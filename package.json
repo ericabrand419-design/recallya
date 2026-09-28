@@ -1,0 +1,14 @@
+{
+  "name": "recallya",
+  "version": "2.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "description": "Agent-first relationship intelligence CRM with memory, voice, publisher, lead intake, sequences, automation and optional Rouge routing \u2014 Conversations that convert."
+}

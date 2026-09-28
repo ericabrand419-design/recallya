@@ -1,0 +1,40 @@
+{
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/public/index.html"
+    },
+    {
+      "source": "/styles.css",
+      "destination": "/public/styles.css"
+    },
+    {
+      "source": "/app.js",
+      "destination": "/public/app.js"
+    },
+    {
+      "source": "/widget.js",
+      "destination": "/public/widget.js"
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "destination": "/public/manifest.webmanifest"
+    },
+    {
+      "source": "/lead-capture.html",
+      "destination": "/public/lead-capture.html"
+    }
+  ]
+}

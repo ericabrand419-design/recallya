@@ -1,0 +1,3 @@
+name,company,email,role,value,context,next_action
+Dana Mitchell,ABC Motors,dana@example.com,Service Director,7500,"Interested in a two-location Agent First pilot and asked about training time.",Send personalized introduction
+Chris Walker,Metro Auto Group,chris@example.com,Fixed Ops Director,12000,"Referred by a current client. Wants to understand onboarding and rollout timing.",Book discovery call

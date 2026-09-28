@@ -1,0 +1,10 @@
+{
+  "name": "Recallya",
+  "short_name": "Recallya",
+  "description": "Agent-first relationship intelligence. Conversations that convert.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f7fb",
+  "theme_color": "#081b3a",
+  "icons": []
+}
