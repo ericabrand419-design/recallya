@@ -1,0 +1,32 @@
+name: Expand Recallya source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'payload/recallya-2.2.zip.b64'
+
+permissions:
+  contents: write
+
+jobs:
+  expand:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Expand Recallya 2.2 source
+        run: |
+          mkdir -p /tmp/recallya-expand
+          base64 -d payload/recallya-2.2.zip.b64 > /tmp/recallya.zip
+          unzip -q /tmp/recallya.zip -d /tmp/recallya-expand
+          cp -a /tmp/recallya-expand/Recallya-2.2-Trust/. .
+
+      - name: Commit expanded source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Expand Recallya 2.2 Trust + Team source" || exit 0
+          git push
