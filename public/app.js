@@ -148,7 +148,7 @@ let portfolio=savedPortfolio||{activeWorkspaceId:'agent-first',workspaces:[
 ]};
 portfolio.workspaces=(portfolio.workspaces||[]).map(w=>({...w,short:w.short||workspaceInitials(w.name),products:Array.isArray(w.products)?w.products:[],data:normalizeWorkspaceData(w.data)}));
 if(!portfolio.workspaces.length){portfolio.workspaces=[{id:'agent-first',name:'Agent First',short:'AF',type:'business',category:'Business',website:'',goal:'Convert conversations',products:[],data:stateSnapshot()}]}
-const directRoute=location.pathname.replace(/\/+$/,'')||'/';
+const directRoute=(document.querySelector('meta[name="recallya-entry"]')?.content==='rouge'||new URLSearchParams(location.search).get('mode')==='rouge')?'/rouge':(location.pathname.replace(/\/+$/,'')||'/');
 const routeWorkspaceId=directRoute==='/rouge'?'creator-demo':null;
 let activeWorkspaceId=routeWorkspaceId&&portfolio.workspaces.some(w=>w.id===routeWorkspaceId)?routeWorkspaceId:(portfolio.workspaces.some(w=>w.id===portfolio.activeWorkspaceId)?portfolio.activeWorkspaceId:portfolio.workspaces[0].id);
 function activeWorkspace(){return portfolio.workspaces.find(w=>w.id===activeWorkspaceId)||portfolio.workspaces[0]}
