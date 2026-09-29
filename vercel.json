@@ -17,10 +17,6 @@
       "destination": "/public/index.html"
     },
     {
-      "source": "/rouge",
-      "destination": "/public/index.html"
-    },
-    {
       "source": "/styles.css",
       "destination": "/public/styles.css"
     },
