@@ -148,10 +148,12 @@ let portfolio=savedPortfolio||{activeWorkspaceId:'agent-first',workspaces:[
 ]};
 portfolio.workspaces=(portfolio.workspaces||[]).map(w=>({...w,short:w.short||workspaceInitials(w.name),products:Array.isArray(w.products)?w.products:[],data:normalizeWorkspaceData(w.data)}));
 if(!portfolio.workspaces.length){portfolio.workspaces=[{id:'agent-first',name:'Agent First',short:'AF',type:'business',category:'Business',website:'',goal:'Convert conversations',products:[],data:stateSnapshot()}]}
-let activeWorkspaceId=portfolio.workspaces.some(w=>w.id===portfolio.activeWorkspaceId)?portfolio.activeWorkspaceId:portfolio.workspaces[0].id;
+const directRoute=location.pathname.replace(/\/+$/,'')||'/';
+const routeWorkspaceId=directRoute==='/rouge'?'creator-demo':null;
+let activeWorkspaceId=routeWorkspaceId&&portfolio.workspaces.some(w=>w.id===routeWorkspaceId)?routeWorkspaceId:(portfolio.workspaces.some(w=>w.id===portfolio.activeWorkspaceId)?portfolio.activeWorkspaceId:portfolio.workspaces[0].id);
 function activeWorkspace(){return portfolio.workspaces.find(w=>w.id===activeWorkspaceId)||portfolio.workspaces[0]}
 function replaceState(next){const d=normalizeWorkspaceData(next);for(const k of STATE_KEYS)state[k]=structuredClone(d[k])}
-if(savedPortfolio)replaceState(activeWorkspace().data);
+if(savedPortfolio||routeWorkspaceId)replaceState(activeWorkspace().data);
 function syncActiveWorkspace(){const w=activeWorkspace();if(w)w.data=stateSnapshot();portfolio.activeWorkspaceId=activeWorkspaceId}
 function persistPortfolio(){syncActiveWorkspace();storage.setItem('recallya-portfolio-v1',JSON.stringify(portfolio));storage.setItem('recallya-v2',JSON.stringify(stateSnapshot()))}
 function workspaceMetrics(w){const d=normalizeWorkspaceData(w.data);return{pipeline:d.people.reduce((a,p)=>a+(Number(p.value)||0),0),needs:d.conversations.filter(c=>c.needsMe).length,leads:d.people.filter(p=>p.intent==='lead').length,tasks:d.agenda.length,promises:d.promises.length,campaigns:d.campaigns.length}}
@@ -327,3 +329,11 @@ function bindEvents(){
 function render(){updateWorkspaceChrome();renderPortfolio();renderPriorities();renderPromises();renderAgenda();renderMetrics();renderThreads();renderPeople();renderLeadSources();renderSequences();renderVoices();renderPublisher();renderAutomations();renderIntegrations();renderRouge();renderAutomationState();renderTrustCenter();renderTeamDialog();bindPersonOpen()}
 
 render();bindEvents();consumeInboundLeads();fillRougeForm();
+if(directRoute==='/rouge'){
+  navigate('more');
+  document.title='Recallya Rouge — Conversations that convert.';
+  requestAnimationFrame(()=>{
+    const card=document.querySelector('#rougeCard');
+    if(card)card.scrollIntoView({behavior:'smooth',block:'center'});
+  });
+}
