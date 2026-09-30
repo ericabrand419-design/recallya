@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   json(res, 200, {
     ok: true,
     service: 'recallya',
-    version: '2.2.0',
+    version: '2.3.0',
     configured: {
       supabase: Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
       x: Boolean(process.env.X_USER_ACCESS_TOKEN),
