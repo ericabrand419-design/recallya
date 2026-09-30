@@ -437,3 +437,89 @@ create table if not exists identity_resolution_suggestions (
   status text not null default 'review',
   created_at timestamptz not null default now()
 );
+
+-- Recallya 2.3 relationship reconstruction
+alter table if exists customers add column if not exists active_in_recallya boolean default true;
+alter table if exists customers add column if not exists lifecycle_stage text;
+alter table if exists customers add column if not exists relationship_stage text;
+alter table if exists customers add column if not exists stage_source text;
+alter table if exists customers add column if not exists stage_confidence numeric;
+alter table if exists customers add column if not exists stage_human_locked boolean default false;
+alter table if exists customers add column if not exists relationship_reason text;
+alter table if exists customers add column if not exists needs_relationship_review boolean default false;
+alter table if exists customers add column if not exists import_batch_id uuid;
+
+create table if not exists import_jobs (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid,
+  workspace_id text,
+  filename text not null,
+  source_format text,
+  total_rows integer default 0,
+  imported_rows integer default 0,
+  duplicate_rows integer default 0,
+  status text default 'pending',
+  mapping jsonb default '{}'::jsonb,
+  created_at timestamptz default now(),
+  completed_at timestamptz
+);
+
+create table if not exists relationship_inferences (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid,
+  customer_id uuid,
+  proposed_stage text,
+  lifecycle text,
+  confidence numeric,
+  reason text,
+  evidence jsonb default '[]'::jsonb,
+  engine text,
+  status text default 'suggested',
+  human_override boolean default false,
+  created_at timestamptz default now(),
+  reviewed_at timestamptz
+);
+
+create table if not exists relationship_context_entries (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid,
+  customer_id uuid,
+  source_type text not null,
+  source_ref text,
+  raw_text text,
+  extracted_context jsonb default '{}'::jsonb,
+  explicit_fact boolean default true,
+  created_by text,
+  created_at timestamptz default now()
+);
+
+create table if not exists connected_accounts (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid,
+  workspace_id text,
+  provider text not null,
+  account_identifier text,
+  scopes text[],
+  status text default 'pending',
+  token_secret_ref text,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table if not exists communication_learning_events (
+  id uuid primary key default gen_random_uuid(),
+  organization_id uuid,
+  voice_profile_id uuid,
+  source_type text,
+  source_ref text,
+  observed_text text,
+  user_correction text,
+  accepted boolean,
+  metadata jsonb default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+
+create index if not exists idx_relationship_inferences_customer on relationship_inferences(customer_id);
+create index if not exists idx_context_entries_customer on relationship_context_entries(customer_id);
+create index if not exists idx_import_jobs_workspace on import_jobs(workspace_id);
