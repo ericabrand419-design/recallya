@@ -1,6 +1,6 @@
 {
   "name": "recallya",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,5 +10,5 @@
   "engines": {
     "node": ">=20"
   },
-  "description": "Agent-first relationship intelligence CRM with memory, voice, publisher, lead intake, sequences, automation and optional Rouge routing \u2014 Conversations that convert."
+  "description": "Agent-first relationship operating system with multi-business CRM, source-backed memory, relationship reconstruction, voice, publisher, lead intake, sequences, automation and optional Rouge routing."
 }
