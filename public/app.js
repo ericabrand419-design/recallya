@@ -363,3 +363,170 @@ if(directRoute==='/rouge'){
   navigate('rouge');
   document.title='Recallya Rouge — Conversations that convert.';
 }
+
+;(function recallyaReconstruction23(){
+  const RC_MARK='recallya-reconstruction-2.3';
+  if(window[RC_MARK]) return;
+  window[RC_MARK]=true;
+
+  const STAGES=['New lead','Nurturing','Opportunity','Proposal','Decision','Customer','Past customer','Dormant','Do not contact'];
+  let pending=null;
+  let speech=null;
+
+  const life=s=>s==='Customer'?'Customer':['Past customer','Dormant','Do not contact'].includes(s)?'Inactive':['New lead','Nurturing'].includes(s)?'Lead':'Opportunity';
+  const intent=s=>s==='Customer'?'customer':['Opportunity','Proposal','Decision'].includes(s)?'hot':'lead';
+  const plan=()=>{const p=state.plan||{};const free=/free/i.test(p.name||'');return{name:p.name||'Free',free,limit:free?Number(p.contactLimit||50):Infinity}};
+  const activeCount=()=>state.people.filter(p=>p.activeInRecallya!==false).length;
+  const esc2=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  const patterns={
+    name:['name','fullname','contactname','customername'],firstName:['firstname','first'],lastName:['lastname','last','surname'],
+    email:['email','emailaddress','email1'],phone:['phone','mobile','telephone','cell'],company:['company','organization','account','business'],
+    role:['role','title','jobtitle','position'],stage:['stage','dealstage','lifecyclestage','status','leadstatus'],
+    notes:['notes','note','context','description','comments','history'],value:['value','dealvalue','amount','revenue','lifetimevalue'],
+    source:['source','leadsource','originsource'],lastContact:['lastcontact','lastactivity','lastcontacted']
+  };
+
+  function splitCSV(line){
+    const out=[];let cur='',quoted=false;
+    for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(quoted&&line[i+1]==='"'){cur+='"';i++}else quoted=!quoted}else if(ch===','&&!quoted){out.push(cur);cur=''}else cur+=ch}
+    out.push(cur);return out.map(x=>x.trim());
+  }
+  function parseCSV(text){
+    const lines=String(text).replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());if(!lines.length)return{headers:[],rows:[]};
+    const headers=splitCSV(lines[0]);return{headers,rows:lines.slice(1).map(line=>{const vals=splitCSV(line);return Object.fromEntries(headers.map((h,i)=>[h,vals[i]??'']))})};
+  }
+  function parseJSON(text){
+    const d=JSON.parse(text);const rows=Array.isArray(d)?d:Array.isArray(d.contacts)?d.contacts:[d];return{headers:[...new Set(rows.flatMap(r=>Object.keys(r||{})))],rows};
+  }
+  function parseVCF(text){
+    const rows=String(text).split(/END:VCARD/i).map(x=>x.trim()).filter(Boolean).map(card=>{
+      const get=k=>{const m=card.match(new RegExp('^'+k+'(?:;[^:]*)?:(.*)$','im'));return m?m[1].trim():''};
+      const n=get('N').split(';');return{Name:get('FN')||[n[1],n[0]].filter(Boolean).join(' '),Email:get('EMAIL'),Phone:get('TEL'),Company:get('ORG'),Role:get('TITLE'),Notes:get('NOTE')};
+    });
+    return{headers:['Name','Email','Phone','Company','Role','Notes'],rows};
+  }
+  function detect(headers){const m={};for(const h of headers){const n=norm(h);m[h]=Object.entries(patterns).find(([,a])=>a.includes(n))?.[0]||'skip'}return m}
+  function mapped(row,map){const x={};for(const [h,f] of Object.entries(map))if(f!=='skip'&&String(row[h]??'').trim())x[f]=String(row[h]).trim();x.name=x.name||[x.firstName,x.lastName].filter(Boolean).join(' ')||x.email||'Imported contact';return x}
+  function score(x){let s=0;if(x.email)s+=10;if(x.phone)s+=5;if(x.company)s+=4;if(x.notes)s+=Math.min(10,x.notes.length/80);if(Number(x.value))s+=Math.min(30,Number(x.value)/1000);const t=`${x.stage||''} ${x.notes||''}`.toLowerCase();if(/customer|client|paid|invoice/.test(t))s+=30;else if(/proposal|quote|contract/.test(t))s+=24;else if(/interested|demo|discovery|pricing/.test(t))s+=18;return s}
+
+  function ensureUI(){
+    if(!document.querySelector('#reconstructionDialog')){
+      document.body.insertAdjacentHTML('beforeend',`<dialog id="reconstructionDialog" class="modal-dialog reconstruction-dialog"><div class="modal-shell reconstruction-shell"><div class="modal-head"><div><p class="eyebrow">RELATIONSHIP RECONSTRUCTION</p><h2>Bring your customers. Keep their history.</h2></div><button class="icon-btn" id="reconstructionClose">×</button></div><div id="reconstructionContent"></div><div id="reconImportPreview" hidden></div><input id="reconstructionFile" type="file" accept=".csv,.json,.vcf,text/csv,application/json,text/vcard" hidden /></div></dialog>`);
+      $('#reconstructionClose').onclick=()=>$('#reconstructionDialog').close();
+      $('#reconstructionDialog').onclick=e=>{if(e.target===$('#reconstructionDialog'))e.target.close()};
+      $('#reconstructionFile').onchange=e=>{const f=e.target.files?.[0];e.target.value='';handleFile(f)};
+    }
+    const head=document.querySelector('.people-head-actions');
+    if(head&&!document.querySelector('#reconstructionBtn')){
+      const b=document.createElement('button');b.className='soft-btn small';b.id='reconstructionBtn';b.textContent='Reconstruct';b.onclick=openCenter;head.insertBefore(b,document.querySelector('#addLeadBtn'));
+    }
+    const grid=document.querySelector('.feature-launch-grid');
+    if(grid&&!document.querySelector('#openReconstructionBtn')){
+      const b=document.createElement('button');b.className='feature-launch reconstruction';b.id='openReconstructionBtn';b.innerHTML='<span class="feature-icon">↺</span><div><b>Relationship Reconstruction</b><small>Import history, infer stages, correct anything, export anytime.</small></div><em>Agent First</em>';b.onclick=openCenter;grid.appendChild(b);
+    }
+    if($('#importLeadsBtn'))$('#importLeadsBtn').onclick=openCenter;
+  }
+
+  function openCenter(){ensureUI();renderCenter();renderPreview();$('#reconstructionDialog').showModal()}
+
+  function renderCenter(){
+    const host=$('#reconstructionContent');if(!host)return;
+    const p=plan(),people=state.people,needs=people.filter(x=>x.needsRelationshipReview).length,inferred=people.filter(x=>x.relationshipInference).length,parked=people.filter(x=>x.activeInRecallya===false).length;
+    const rows=[...people].sort((a,b)=>(b.needsRelationshipReview?1:0)-(a.needsRelationshipReview?1:0)).slice(0,150);
+    host.innerHTML=`<div class="recon-hero"><div><span>AGENT-FIRST MIGRATION</span><h3>Import first. Fix anything whenever you want.</h3><p>Recallya preserves source evidence, infers relationship state and lets the human override it forever.</p></div><div class="recon-plan"><b>${esc2(p.name)}</b><span>${p.free?`${activeCount()} / ${p.limit} active relationships`:'Unlimited active relationships'}</span></div></div>
+      <div class="recon-metrics"><div><b>${people.length}</b><span>relationships</span></div><div><b>${needs}</b><span>need review</span></div><div><b>${inferred}</b><span>reconstructed</span></div><div><b>${parked}</b><span>parked</span></div></div>
+      <div class="recon-toolbar"><button class="primary-btn" id="rcFile">Import CRM export</button><button class="soft-btn" id="rcAnalyze">Reconstruct relationships</button>${p.free?'<button class="soft-btn" id="rcBest">Activate best 50</button>':''}<button class="soft-btn" id="rcExport">Export CSV</button></div>
+      <div id="rcStatus" class="recon-status">${inferred?'Everything below stays editable. Human corrections outrank inference.':'Upload a CRM export or reconstruct the contacts already here.'}</div>
+      <div class="recon-connectors"><div><span>✉</span><div><b>Email history</b><small id="rcGoogle">Checking Google connection…</small></div><button class="soft-btn small" id="rcEmailHow">How it works</button></div><div><span>◉</span><div><b>Communication style</b><small>Learn your writing voice from approved sent messages and corrections.</small></div><button class="soft-btn small" id="rcLearnVoice">Learn from my messages</button></div></div>
+      <div class="recon-table"><div class="recon-table-head"><b>Relationship</b><b>Stage</b><b>Evidence</b><b></b></div>${rows.map(x=>`<div class="recon-row ${x.activeInRecallya===false?'parked':''}"><div><b>${esc2(x.name)}</b><span>${esc2(x.company||'')} · ${esc2(x.email||'No email')}</span>${x.activeInRecallya===false?'<em>Parked · not counted as active</em>':''}</div><div><select data-rc-stage="${x.id}">${STAGES.map(s=>`<option ${s===x.stage?'selected':''}>${s}</option>`).join('')}</select><small>${x.humanStageOverride?'Human-set':x.relationshipConfidence?`${x.relationshipConfidence}% confidence`:'Not reconstructed'}</small></div><div><span>${esc2(x.relationshipReason||x.summary||'No evidence yet.')}</span>${x.needsRelationshipReview?'<em class="review-flag">Needs review</em>':''}</div><button class="recon-link" data-rc-open="${x.id}">Open</button></div>`).join('')}</div>`;
+    $$('[data-rc-stage]').forEach(s=>s.onchange=()=>setStage(s.dataset.rcStage,s.value));
+    $$('[data-rc-open]').forEach(b=>b.onclick=()=>openPerson(b.dataset.rcOpen));
+    $('#rcFile').onclick=()=>$('#reconstructionFile').click();$('#rcAnalyze').onclick=()=>analyze(false);$('#rcExport').onclick=exportCSV;
+    if($('#rcBest'))$('#rcBest').onclick=activateBest;
+    $('#rcEmailHow').onclick=()=>toast('When Google OAuth is configured, Recallya can match authorized Gmail threads to imported email addresses and reconstruct relationship history from those messages.');
+    $('#rcLearnVoice').onclick=learnVoice;
+    fetch('/api/health').then(r=>r.json()).then(h=>{if($('#rcGoogle'))$('#rcGoogle').textContent=h?.configured?.google?'Google OAuth configured · Gmail connection can be enabled':'Google OAuth credentials still need to be added in Vercel'}).catch(()=>{});
+  }
+
+  function renderPreview(){
+    const host=$('#reconImportPreview');if(!host)return;if(!pending){host.hidden=true;host.innerHTML='';return}host.hidden=false;
+    const opts=[['skip','Skip'],['name','Full name'],['firstName','First name'],['lastName','Last name'],['email','Email'],['phone','Phone'],['company','Company'],['role','Role/title'],['stage','Relationship stage'],['notes','Notes/history'],['value','Value'],['source','Source'],['lastContact','Last contact']];
+    host.innerHTML=`<div class="recon-preview-head"><div><b>${esc2(pending.name)}</b><span>${pending.rows.length} records · change any mapping before import</span></div><button class="recon-link" id="rcCancel">Cancel</button></div><div class="mapping-grid">${pending.headers.map(h=>`<label><span>${esc2(h)}</span><select data-rc-map="${esc2(h)}">${opts.map(([v,l])=>`<option value="${v}" ${pending.map[h]===v?'selected':''}>${l}</option>`).join('')}</select></label>`).join('')}</div><div class="recon-sample"><b>Sample</b><div>${pending.rows.slice(0,3).map(r=>esc2(Object.values(r).filter(Boolean).slice(0,5).join(' · '))).join('<br>')}</div></div><div class="recon-actions"><button class="soft-btn" id="rcKeep">Keep editing</button><button class="primary-btn" id="rcCommit">Import now</button></div>`;
+    $$('[data-rc-map]').forEach(s=>s.onchange=()=>pending.map[s.dataset.rcMap]=s.value);$('#rcCancel').onclick=()=>{pending=null;renderPreview()};$('#rcKeep').onclick=()=>toast('Mapping stays editable until you import.');$('#rcCommit').onclick=commitImport;
+  }
+
+  async function handleFile(file){
+    if(!file)return;const ext=file.name.split('.').pop().toLowerCase(),text=await file.text();
+    try{const parsed=ext==='json'?parseJSON(text):ext==='vcf'?parseVCF(text):parseCSV(text);if(!parsed.rows.length)return toast('No contacts were found in that file.');pending={...parsed,name:file.name,map:detect(parsed.headers)};renderPreview()}catch{toast('Recallya could not read that file. Try a CRM CSV, JSON export or vCard file.')}
+  }
+
+  async function commitImport(){
+    if(!pending)return;
+    const rows=pending.rows.map(r=>mapped(r,pending.map)).filter(x=>x.name||x.email),p=plan();let left=p.free?Math.max(0,p.limit-activeCount()):Infinity;
+    const ranked=[...rows].sort((a,b)=>score(b)-score(a)),take=left===Infinity?ranked.length:left,active=new Set(ranked.slice(0,take).map(x=>`${x.email}|${x.name}`));
+    const byEmail=new Map(state.people.filter(x=>x.email).map(x=>[x.email.toLowerCase(),x]));let created=0,duplicates=0;
+    for(const row of rows){
+      const existing=row.email?byEmail.get(row.email.toLowerCase()):null;
+      if(existing){duplicates++;existing.importDuplicateSuggestion=true;existing.importedHistory=[...(existing.importedHistory||[]),row.notes].filter(Boolean);continue}
+      const r=buildLeadRecord({name:row.name,company:row.company||'Independent',email:row.email||'',role:row.role||'Prospect',source:row.source||`Import · ${pending.name}`,value:row.value||0,context:row.notes||'',nextAction:'Review reconstructed relationship'});
+      const st=row.stage||'New lead';Object.assign(r.p,{phone:row.phone||'',stage:st,status:st,lifecycle:life(st),intent:intent(st),lastContact:row.lastContact||'Imported',activeInRecallya:active.has(`${row.email}|${row.name}`),humanStageOverride:Boolean(row.stage),relationshipConfidence:row.stage?99:0,relationshipReason:row.stage?'Imported stage was explicit.':'Awaiting reconstruction.',needsRelationshipReview:!row.stage,importBatch:pending.name});
+      state.people.push(r.p);state.conversations.push(r.c);state.activities.push(r.activity);created++;
+    }
+    pending=null;save();render();renderPreview();renderCenter();toast(`${created} relationships imported · ${duplicates} possible duplicate${duplicates===1?'':'s'}`);await analyze(true);
+  }
+
+  async function analyze(onlyUnreviewed){
+    const candidates=state.people.filter(p=>!p.humanStageOverride&&(!onlyUnreviewed||p.needsRelationshipReview||!p.relationshipConfidence));
+    if(!candidates.length)return toast('Nothing needs reconstruction right now.');
+    if($('#rcStatus'))$('#rcStatus').textContent=`Reconstructing ${candidates.length} relationships…`;let engine='rules_fallback';
+    for(let i=0;i<candidates.length;i+=75){
+      const batch=candidates.slice(i,i+75).map(p=>({id:p.id,name:p.name,company:p.company,email:p.email,stage:p.stage,status:p.status,lifecycle:p.lifecycle,notes:(p.importedHistory||[]).join(' ')||p.summary,memory:p.memory||[],objections:p.objections||[],purchases:p.purchases||[],lastContact:p.lastContact}));
+      try{
+        const d=await fetch('/api/reconstruct',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contacts:batch})}).then(r=>r.json());
+        if(d.ok){
+          engine=d.engine||engine;
+          for(const inf of d.reconstructed||[]){
+            const p=state.people.find(x=>x.id===inf.id);if(!p||p.humanStageOverride)continue;
+            p.stage=inf.stage;p.status=inf.stage;p.lifecycle=inf.lifecycle||life(inf.stage);p.intent=intent(inf.stage);p.relationshipConfidence=Number(inf.confidence||0);p.relationshipReason=inf.reason||'';p.needsRelationshipReview=Boolean(inf.needsReview);p.relationshipInference={...inf,engine,at:new Date().toISOString()};
+          }
+        }
+      }catch{}
+    }
+    save();render();renderCenter();toast(`Reconstructed ${candidates.length} relationships`);
+  }
+
+  function setStage(id,stage){
+    const p=state.people.find(x=>x.id===id);if(!p)return;p.stage=stage;p.status=stage;p.lifecycle=life(stage);p.intent=intent(stage);p.humanStageOverride=true;p.relationshipConfidence=100;p.relationshipReason='Human correction';p.needsRelationshipReview=false;
+    p.memoryEvidence=p.memoryEvidence||[];p.memoryEvidence.unshift({id:`${p.id}-stage-${Date.now()}`,text:`Relationship stage corrected to ${stage}.`,source:'Human correction',sourceDetail:'Owner/team member',confidence:'Explicit',verified:true});save();render();renderCenter();toast(`${p.name}: ${stage}`);
+  }
+
+  function addContext(id,text){
+    const p=state.people.find(x=>x.id===id),v=String(text||'').trim();if(!p||!v)return;p.memory=p.memory||[];p.memory.unshift(v);p.memoryEvidence=p.memoryEvidence||[];p.memoryEvidence.unshift({id:`${p.id}-context-${Date.now()}`,text:v,source:'Human note',sourceDetail:'Added directly to relationship',confidence:'Explicit',verified:true});p.needsRelationshipReview=true;state.activities.unshift({time:new Date().toISOString(),type:'relationship_context_added',personId:id,text:v});save();render();toast('Relationship context added');
+  }
+
+  function enhancePerson(){
+    const host=$('#personDetail');if(!host||host.querySelector('.recon-person-card')||!activePersonId)return;const p=state.people.find(x=>x.id===activePersonId),body=host.querySelector('.detail-body');if(!p||!body)return;
+    const sec=document.createElement('section');sec.className='detail-card recon-person-card';sec.innerHTML=`<div class="detail-card-head"><h3>Relationship state & context</h3><span class="trust-chip">${p.humanStageOverride?'Human-set':p.relationshipConfidence?`${p.relationshipConfidence}% inferred`:'Editable anytime'}</span></div><label class="recon-stage-editor"><span>Where are you in the relationship?</span><select id="rcPersonStage">${STAGES.map(s=>`<option ${s===p.stage?'selected':''}>${s}</option>`).join('')}</select></label><div class="recon-evidence">${esc2(p.relationshipReason||'Recallya has not reconstructed this relationship yet.')}${p.relationshipInference?.evidence?.length?`<small>Evidence: ${p.relationshipInference.evidence.map(e=>esc2(e.detail)).join(' · ')}</small>`:''}</div><label class="context-capture"><span>Tell Recallya what you already know</span><textarea id="rcPersonContext" placeholder="Talk or type. Customer history, objections, invoices, what happened on the phone, what they want next…"></textarea></label><div class="button-row wrap"><button class="primary-btn small" id="rcSaveContext">Add to relationship</button><button class="soft-btn small" id="rcAnalyzePerson">Reconstruct from what we know</button></div>`;body.prepend(sec);
+    $('#rcPersonStage').onchange=()=>setStage(p.id,$('#rcPersonStage').value);$('#rcSaveContext').onclick=()=>{addContext(p.id,$('#rcPersonContext').value);openPerson(p.id)};$('#rcAnalyzePerson').onclick=async()=>{p.humanStageOverride=false;p.needsRelationshipReview=true;await analyze(true);openPerson(p.id)};addMics();
+  }
+
+  function activateBest(){const p=plan();if(!p.free)return toast('This workspace is not contact-limited.');const rows=[...state.people].sort((a,b)=>score({email:b.email,company:b.company,notes:b.summary,value:b.value,stage:b.stage})-score({email:a.email,company:a.company,notes:a.summary,value:a.value,stage:a.stage}));rows.forEach((x,i)=>x.activeInRecallya=i<p.limit);save();render();renderCenter();toast(`Best ${Math.min(p.limit,rows.length)} relationships activated`)}
+
+  function exportCSV(){const cols=['name','company','role','email','phone','stage','lifecycle','status','value','source','lastContact','activeInRecallya','relationshipConfidence','summary'],q=v=>`"${String(v??'').replace(/"/g,'""')}"`,csv=[cols.join(','),...state.people.map(p=>cols.map(c=>q(p[c])).join(','))].join('\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`recallya-${activeWorkspace().id}-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('CRM export created')}
+
+  function learnVoice(){const samples=state.conversations.flatMap(c=>(c.messages||[]).filter(m=>m.d==='out').map(m=>m.text)).filter(Boolean);if(!samples.length)return toast('Send or add a few messages first so Recallya has your writing to learn from.');const v=state.voiceProfiles.find(x=>x.id==='founder')||state.voiceProfiles[0],avg=Math.round(samples.reduce((a,x)=>a+x.length,0)/samples.length);v.samples=[...new Set([...(v.samples||[]),...samples.slice(-20)])].slice(-30);v.description=`Learned from ${samples.length} approved sent messages. Typical message length is about ${avg} characters. Preserve the user’s natural phrasing, directness and CTA style. Human corrections outrank inferred style.`;save();render();toast(`Voice profile learned from ${samples.length} sent messages`)}
+
+  function addMics(){
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    $$('textarea,input[type="text"],input[type="search"]').forEach(field=>{
+      if(field.dataset.mic23||field.disabled||field.readOnly)return;field.dataset.mic23='1';field.classList.add('has-mic');const host=field.parentElement;if(!host)return;host.classList.add('mic-host');
+      const b=document.createElement('button');b.type='button';b.className='mic-input-button';b.textContent='🎙';b.title='Speak instead of typing';b.setAttribute('aria-label','Speak instead of typing');
+      b.onclick=()=>{if(!SR)return toast('Voice dictation is not supported by this browser.');if(speech){try{speech.stop()}catch{}speech=null}speech=new SR();speech.lang='en-US';speech.interimResults=false;b.classList.add('listening');speech.onresult=e=>{const t=[...e.results].map(r=>r[0].transcript).join(' ').trim();if(t)field.value=(field.value.trim()?field.value.trim()+' ':'')+t;field.dispatchEvent(new Event('input',{bubbles:true}))};speech.onerror=()=>toast('I could not hear that clearly.');speech.onend=()=>{b.classList.remove('listening');speech=null};speech.start()};
+      host.appendChild(b);
+    });
+  }
+
+  ensureUI();addMics();
+  const obs=new MutationObserver(()=>{ensureUI();enhancePerson();addMics()});obs.observe(document.body,{childList:true,subtree:true});
+})();
