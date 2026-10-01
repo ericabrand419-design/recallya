@@ -519,7 +519,7 @@ if(directRoute==='/rouge'){
 
   function addMics(){
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-    $('textarea,input:not([type]),input[type="text"],input[type="search"],input[type="email"],input[type="url"],input[type="tel"]').forEach(field=>{
+    $$('textarea,input:not([type]),input[type="text"],input[type="search"],input[type="email"],input[type="url"],input[type="tel"]').forEach(field=>{
       if(field.dataset.mic23||field.disabled||field.readOnly)return;field.dataset.mic23='1';field.classList.add('has-mic');const host=field.parentElement;if(!host)return;host.classList.add('mic-host');
       const b=document.createElement('button');b.type='button';b.className='mic-input-button';b.textContent='🎙';b.title='Speak instead of typing';b.setAttribute('aria-label','Speak instead of typing');
       b.onclick=()=>{if(!SR)return toast('Voice dictation is not supported by this browser.');if(speech){try{speech.stop()}catch{}speech=null}speech=new SR();speech.lang='en-US';speech.interimResults=false;b.classList.add('listening');speech.onresult=e=>{const t=[...e.results].map(r=>r[0].transcript).join(' ').trim();if(t)field.value=(field.value.trim()?field.value.trim()+' ':'')+t;field.dispatchEvent(new Event('input',{bubbles:true}))};speech.onerror=()=>toast('I could not hear that clearly.');speech.onend=()=>{b.classList.remove('listening');speech=null};speech.start()};
