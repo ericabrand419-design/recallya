@@ -1,6 +1,6 @@
 {
   "name": "recallya",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,5 +10,5 @@
   "engines": {
     "node": ">=20"
   },
-  "description": "Agent-first relationship operating system with multi-business CRM, source-backed memory, relationship reconstruction, voice, publisher, lead intake, sequences, automation and optional Rouge routing."
+  "description": "Recallya customer relationship operating system with real accounts, persistent workspaces, relationship reconstruction, voice, lead nurturing, automation and optional Rouge."
 }
