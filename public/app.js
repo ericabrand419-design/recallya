@@ -155,7 +155,7 @@ function activeWorkspace(){return portfolio.workspaces.find(w=>w.id===activeWork
 function replaceState(next){const d=normalizeWorkspaceData(next);for(const k of STATE_KEYS)state[k]=structuredClone(d[k])}
 if(savedPortfolio||routeWorkspaceId)replaceState(activeWorkspace().data);
 function syncActiveWorkspace(){const w=activeWorkspace();if(w)w.data=stateSnapshot();portfolio.activeWorkspaceId=activeWorkspaceId}
-function persistPortfolio(){syncActiveWorkspace();storage.setItem('recallya-portfolio-v1',JSON.stringify(portfolio));storage.setItem('recallya-v2',JSON.stringify(stateSnapshot()))}
+function persistPortfolio(){syncActiveWorkspace();storage.setItem('recallya-portfolio-v1',JSON.stringify(portfolio));storage.setItem('recallya-v2',JSON.stringify(stateSnapshot()));window.RecallyaProduction?.queueSave?.(activeWorkspaceId,stateSnapshot(),activeWorkspace())}
 function workspaceMetrics(w){const d=normalizeWorkspaceData(w.data);return{pipeline:d.people.reduce((a,p)=>a+(Number(p.value)||0),0),needs:d.conversations.filter(c=>c.needsMe).length,leads:d.people.filter(p=>p.intent==='lead').length,tasks:d.agenda.length,promises:d.promises.length,campaigns:d.campaigns.length}}
 function switchWorkspace(id,{goToday=true}={}){if(id===activeWorkspaceId)return;if(!portfolio.workspaces.some(w=>w.id===id))return;syncActiveWorkspace();activeWorkspaceId=id;portfolio.activeWorkspaceId=id;replaceState(activeWorkspace().data);activeConversationId=null;activePersonId=null;peopleFilter='all';persistPortfolio();render();if(goToday)navigate('today');toast(`Switched to ${activeWorkspace().name}`)}
 function parseProducts(text=''){return String(text).split(/\n+/).map(x=>x.trim()).filter(Boolean).map(line=>{const [name,...rest]=line.split('|');return{name:name.trim(),price:rest.join('|').trim()||''}})}
@@ -180,7 +180,7 @@ function save(){persistPortfolio()}
 function toast(text){const el=$('#toast');el.textContent=text;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
 function navigate(view){$$('.view').forEach(v=>v.classList.toggle('active',v.id===`${view}-view`));$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));const map={portfolio:['OWNER VIEW','Portfolio'],today:['YOUR RELATIONSHIPS, READY TO MOVE','Today'],inbox:['CONVERSATIONS WITH CONTEXT','Inbox'],people:['RELATIONSHIP MEMORY','People'],ask:['ASK YOUR RELATIONSHIPS','Ask Recallya'],rouge:['PRIVATE RELATIONSHIP INTELLIGENCE','Rouge'],more:['SYSTEMS THAT WORK AROUND YOU','More']};if($('#pageTitle')){$('#pageEyebrow').textContent=map[view]?.[0]||'';$('#pageTitle').textContent=map[view]?.[1]||'Recallya'}window.scrollTo({top:0,behavior:'smooth'})}
 
-function buildLeadRecord(data={}){const name=String(data.name||'New lead').trim();const source=String(data.source||'Manual').trim();const id=nowId('lead');const context=String(data.context||'').trim();const p={id,name,initials:initialsFor(name),company:String(data.company||'Independent').trim(),role:String(data.role||'Prospect').trim(),email:String(data.email||'').trim(),status:'New lead',intent:'lead',stage:'New lead',value:Number(data.value||0),lastContact:'Just now',summary:context||`New lead captured from ${source}.`,preferences:[],objections:[],promises:[],purchases:[],memory:[`Lead entered Recallya from ${source}.`,...(context?[context]:[])],nextAction:String(data.nextAction||'Send personalized introduction'),nextWhy:`Captured from ${source}. Recallya created the relationship record and is ready to move it into the right follow-up.`,sequence:null,source,sourceDetail:String(data.sourceDetail||''),capturedAt:'Just now',preferredVoice:'sales',salesCue:'Use the source and stated interest to make the first outreach relevant, then ask for one concrete next step.',ownerId:'erica',lifecycle:'Lead',consent:{email:true,sms:false,dm:true,doNotContact:false,preferredChannel:'Email',frequency:'Normal'},internalNotes:[],memoryEvidence:[{id:`${id}-source`,text:`Lead entered Recallya from ${source}.`,source:'Lead intake',sourceDetail:source,confidence:'Explicit',verified:true},...(context?[{id:`${id}-context`,text:context,source:'Inbound message',sourceDetail:'Lead submission',confidence:'Explicit',verified:true}]:[])]};const c={id:nowId('c'),personId:id,time:'Now',needsMe:true,handled:false,waiting:false,preview:context||`New ${source.toLowerCase()} lead ready for follow-up.`,mode:'Approval',voiceId:'sales',messages:context?[{d:'in',text:context,time:'Now'}]:[]};const activity={time:new Date().toISOString(),type:'lead_created',personId:id,text:`Lead captured from ${source}`};return{p,c,activity}}
+function buildLeadRecord(data={}){const name=String(data.name||'New lead').trim();const source=String(data.source||'Manual').trim();const id=nowId('lead');const context=String(data.context||'').trim();const p={id,name,initials:initialsFor(name),company:String(data.company||'Independent').trim(),role:String(data.role||'Prospect').trim(),email:String(data.email||'').trim(),status:'New lead',intent:'lead',stage:'New lead',value:Number(data.value||0),lastContact:'Just now',summary:context||`New lead captured from ${source}.`,preferences:[],objections:[],promises:[],purchases:[],memory:[`Lead entered Recallya from ${source}.`,...(context?[context]:[])],nextAction:String(data.nextAction||'Send personalized introduction'),nextWhy:`Captured from ${source}. Recallya created the relationship record and is ready to move it into the right follow-up.`,sequence:null,source,sourceDetail:String(data.sourceDetail||''),capturedAt:'Just now',preferredVoice:'sales',salesCue:'Use the source and stated interest to make the first outreach relevant, then ask for one concrete next step.',ownerId:(state.teamMembers?.[0]?.id||'owner'),lifecycle:'Lead',consent:{email:true,sms:false,dm:true,doNotContact:false,preferredChannel:'Email',frequency:'Normal'},internalNotes:[],memoryEvidence:[{id:`${id}-source`,text:`Lead entered Recallya from ${source}.`,source:'Lead intake',sourceDetail:source,confidence:'Explicit',verified:true},...(context?[{id:`${id}-context`,text:context,source:'Inbound message',sourceDetail:'Lead submission',confidence:'Explicit',verified:true}]:[])]};const c={id:nowId('c'),personId:id,time:'Now',needsMe:true,handled:false,waiting:false,preview:context||`New ${source.toLowerCase()} lead ready for follow-up.`,mode:'Approval',voiceId:'sales',messages:context?[{d:'in',text:context,time:'Now'}]:[]};const activity={time:new Date().toISOString(),type:'lead_created',personId:id,text:`Lead captured from ${source}`};return{p,c,activity}}
 function createLead(data={}){const {p,c,activity}=buildLeadRecord(data);state.people.unshift(p);state.conversations.unshift(c);state.activities.unshift(activity);save();render();toast(`${p.name} added from ${p.source}`);return p}
 function createLeadInWorkspace(workspace,data={}){const d=normalizeWorkspaceData(workspace.data);const {p,c,activity}=buildLeadRecord(data);d.people.unshift(p);d.conversations.unshift(c);d.activities.unshift(activity);workspace.data=d;storage.setItem('recallya-portfolio-v1',JSON.stringify(portfolio));return p}
 function parseCsvLine(line){const out=[];let cur='',quoted=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(quoted&&line[i+1]==='"'){cur+='"';i++}else quoted=!quoted}else if(ch===','&&!quoted){out.push(cur.trim());cur=''}else cur+=ch}out.push(cur.trim());return out}
@@ -530,3 +530,51 @@ if(directRoute==='/rouge'){
   ensureUI();addMics();
   const obs=new MutationObserver(()=>{ensureUI();enhancePerson();addMics()});obs.observe(document.body,{childList:true,subtree:true});
 })();
+
+window.RecallyaApp={
+  state,
+  portfolio,
+  activeWorkspace,
+  stateSnapshot,
+  replaceState,
+  render,
+  navigate,
+  toast,
+  makeWorkspaceData,
+  normalizeWorkspaceData,
+  workspaceInitials,
+  getActiveWorkspaceId:()=>activeWorkspaceId,
+  setProductionPortfolio:(items,preferredId)=>{
+    portfolio.workspaces=(items||[]).map(w=>({
+      id:w.id,
+      slug:w.slug,
+      name:w.name,
+      short:workspaceInitials(w.name),
+      type:w.workspace_type||w.type||'business',
+      category:w.category||'',
+      website:w.website||'',
+      goal:w.primary_goal||w.goal||'Convert conversations',
+      products:Array.isArray(w.products)?w.products:[],
+      data:normalizeWorkspaceData(w.data||{})
+    }));
+    if(!portfolio.workspaces.length)return;
+    activeWorkspaceId=(preferredId&&portfolio.workspaces.some(w=>w.id===preferredId))?preferredId:portfolio.workspaces[0].id;
+    portfolio.activeWorkspaceId=activeWorkspaceId;
+    replaceState(activeWorkspace().data);
+    storage.setItem('recallya-portfolio-v1',JSON.stringify(portfolio));
+    storage.setItem('recallya-v2',JSON.stringify(stateSnapshot()));
+    render();
+  },
+  addProductionWorkspace:(w)=>{
+    const item={
+      id:w.id,slug:w.slug,name:w.name,short:workspaceInitials(w.name),
+      type:w.workspace_type||'business',category:w.category||'',website:w.website||'',
+      goal:w.primary_goal||'Convert conversations',products:w.products||[],
+      data:normalizeWorkspaceData(w.data||makeWorkspaceData(w.name,w.workspace_type||'business','blank'))
+    };
+    portfolio.workspaces.push(item);
+    activeWorkspaceId=item.id;portfolio.activeWorkspaceId=item.id;replaceState(item.data);render();navigate('today');
+    return item;
+  }
+};
+window.dispatchEvent(new CustomEvent('recallya:app-ready'));
