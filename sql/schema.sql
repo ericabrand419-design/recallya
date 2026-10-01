@@ -523,3 +523,33 @@ create table if not exists communication_learning_events (
 create index if not exists idx_relationship_inferences_customer on relationship_inferences(customer_id);
 create index if not exists idx_context_entries_customer on relationship_context_entries(customer_id);
 create index if not exists idx_import_jobs_workspace on import_jobs(workspace_id);
+
+
+-- Recallya 3.0 production account persistence
+create table if not exists workspace_app_state (
+  workspace_id uuid primary key references workspaces(id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  revision bigint not null default 1,
+  updated_by uuid,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists workspace_billing (
+  workspace_id uuid primary key references workspaces(id) on delete cascade,
+  plan_key text not null default 'free',
+  active_contact_limit integer not null default 50,
+  workspace_limit integer not null default 1,
+  seat_limit integer not null default 1,
+  status text not null default 'active',
+  metadata jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists workspace_members_user_idx on workspace_members(user_id);
+create index if not exists workspace_app_state_updated_idx on workspace_app_state(updated_at desc);
+
+alter table workspace_app_state enable row level security;
+alter table workspace_billing enable row level security;
+
+-- Server APIs use the Supabase service role after verifying the signed-in user and
+-- workspace_members authorization. Direct browser access to these tables remains blocked.
