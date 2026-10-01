@@ -88,3 +88,24 @@
 .recon-person-card{background:linear-gradient(180deg,#f7fbff,#fff)}.recon-stage-editor,.context-capture{display:block;margin:10px 0}.recon-stage-editor>span,.context-capture>span{display:block;font-size:12px;font-weight:800;margin-bottom:5px}.context-capture textarea{width:100%;min-height:90px}.recon-evidence{font-size:12px;color:#536579;padding:10px;background:#f4f8fc;border-radius:10px}.recon-evidence small{display:block;margin-top:5px;color:#758697}
 .mic-host{position:relative}.has-mic{padding-right:44px!important}.mic-input-button{position:absolute;right:7px;bottom:7px;width:30px;height:30px;border:1px solid #d6e0e8;background:#fff;border-radius:50%;display:grid;place-items:center;cursor:pointer;z-index:3}.mic-input-button.listening{box-shadow:0 0 0 4px rgba(0,113,227,.14);transform:scale(1.04)}
 @media(max-width:760px){.recon-hero{flex-direction:column}.recon-plan{width:100%}.recon-metrics{grid-template-columns:1fr 1fr}.recon-connectors{grid-template-columns:1fr}.recon-table-head{display:none}.recon-row{grid-template-columns:1fr;gap:7px}.mapping-grid{grid-template-columns:1fr 1fr}.reconstruction-dialog{width:100%;max-width:none;margin:auto 0 0 0}.reconstruction-shell{border-radius:22px 22px 0 0;max-height:92vh;overflow:auto}}
+
+
+/* Recallya 3.0 production account gate */
+body.production-check{overflow:hidden}
+body.production-check .app-shell{visibility:hidden;pointer-events:none}
+.production-gate[hidden]{display:none!important}
+.production-gate{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 15% 10%,rgba(35,139,255,.12),transparent 34%),linear-gradient(145deg,#f7fbff,#edf4fa)}
+.prod-gate-card{width:min(560px,100%);background:#fff;border:1px solid #dbe6ee;border-radius:26px;padding:32px;box-shadow:0 30px 90px rgba(13,38,69,.16)}
+.prod-gate-card h1{font-size:30px;line-height:1.06;letter-spacing:-.035em;margin:10px 0 12px;color:#0b2341}
+.prod-gate-card>p:not(.eyebrow){font-size:15px;line-height:1.55;color:#617286}
+.prod-brand{display:flex;align-items:center;gap:11px;margin-bottom:24px}.prod-brand>div:last-child{display:flex;flex-direction:column}.prod-brand strong{font-size:18px}.prod-brand small{color:#738294}
+.prod-gate-actions{display:flex;gap:10px;margin-top:20px}.prod-gate-actions a{text-decoration:none}
+.prod-note{display:block;margin-top:16px;color:#7a8898;line-height:1.4}
+.prod-auth-message{margin:14px 0;padding:11px 12px;border-radius:11px;background:#edf7ff;color:#0b5ca8;font-size:13px}
+.prod-auth-tabs{display:grid;grid-template-columns:1fr 1fr;border:1px solid #dce5ed;border-radius:12px;padding:3px;margin:22px 0 14px;background:#f6f8fa}.prod-auth-tabs button{border:0;background:transparent;padding:9px;border-radius:9px;font-weight:800;color:#6d7a89;cursor:pointer}.prod-auth-tabs button.active{background:#fff;color:#102c4e;box-shadow:0 2px 8px rgba(18,42,69,.08)}
+.prod-auth-form{display:grid;gap:12px}.prod-auth-form label{font-size:12px;font-weight:800;color:#42556a}.prod-auth-form input{width:100%;margin-top:5px;padding:12px 13px;border:1px solid #d5e0e8;border-radius:11px;font:inherit;outline:none}.prod-auth-form input:focus{border-color:#6ab8f0;box-shadow:0 0 0 3px rgba(38,139,224,.1)}.prod-auth-form .primary-btn{margin-top:3px}
+.prod-divider{display:flex;align-items:center;gap:10px;color:#9aa6b1;font-size:11px;margin:18px 0}.prod-divider:before,.prod-divider:after{content:"";height:1px;background:#e2e8ee;flex:1}.prod-demo-link{display:flex!important;justify-content:center;text-decoration:none}
+.prod-signout{width:100%;margin-top:8px}
+.loading-card{min-height:180px;display:grid;align-content:center}.prod-loader{width:32px;height:32px;border-radius:50%;border:3px solid #d8e8f7;border-top-color:#0875d1;animation:prodspin .8s linear infinite;margin:8px auto 0}@keyframes prodspin{to{transform:rotate(360deg)}}
+body.demo-mode:before{content:"SAMPLE DATA";position:fixed;right:14px;top:14px;z-index:9999;background:#0c2747;color:#fff;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:900;letter-spacing:.12em;pointer-events:none}
+@media(max-width:600px){.production-gate{padding:14px}.prod-gate-card{padding:23px;border-radius:20px}.prod-gate-card h1{font-size:25px}}
