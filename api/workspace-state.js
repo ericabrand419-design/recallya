@@ -37,7 +37,7 @@ export default async function handler(req,res){
     if(billing.plan_key==='free'&&active>Number(billing.active_contact_limit||50)){
       return json(res,409,{ok:false,error:'active_contact_limit_reached',limit:Number(billing.active_contact_limit||50),active});
     }
-    await restJson(`workspace_app_state?workspace_id=eq.${encodeURIComponent(workspaceId)}`,{
+    await restJson(`workspace_app_state?on_conflict=workspace_id`,{
       method:'POST',
       headers:{Prefer:'resolution=merge-duplicates,return=representation'},
       body:JSON.stringify({workspace_id:workspaceId,state:body.state,updated_by:user.id,updated_at:new Date().toISOString()})
