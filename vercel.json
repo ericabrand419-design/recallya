@@ -25,6 +25,10 @@
       "destination": "/public/app.js"
     },
     {
+      "source": "/production.js",
+      "destination": "/public/production.js"
+    },
+    {
       "source": "/widget.js",
       "destination": "/public/widget.js"
     },
