@@ -9,7 +9,7 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
 </head>
-<body class="production-check">\n  <div id="productionGate" class="production-gate" aria-live="polite"></div>
+<body class="production-check">\n  <div id="productionGate" class="production-gate" aria-live="polite"><main class="prod-gate-card loading-card"><div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Loading production…</small></div></div><div class="prod-loader"></div></main></div>
   <div class="app-shell">
     <aside class="desktop-nav" aria-label="Primary navigation">
       <div class="brand-lockup">
@@ -278,6 +278,6 @@ Two-location pilot | $18,000"></textarea><small>One per line. Use “Name | Pric
   <dialog id="teamDialog" class="modal-dialog wide-dialog"><div class="modal-shell"><div class="modal-head"><div><p class="eyebrow">TEAM & HANDOFFS</p><h2>People who can own relationships</h2></div><button class="icon-btn" type="button" data-close="teamDialog">×</button></div><div id="teamMemberList" class="team-member-list"></div><form id="teamForm" class="form-stack team-form"><label>Name<input id="teamName" required placeholder="Team member name" /></label><label>Role<input id="teamRole" placeholder="Sales, Support, Manager..." /></label><label>Access<select id="teamAccess"><option>Active workspace</option><option>Assigned records</option><option>Portfolio owner</option></select></label><button class="primary-btn" type="submit">Add team member</button></form></div></dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="/app.js"></script>\n  <script type="module" src="/production.js"></script>
+\n  <script type="module" src="/production.js"></script>
 </body>
 </html>
