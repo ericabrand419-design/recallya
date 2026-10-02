@@ -1,10 +1,11 @@
-(function recallyaProductionClient(){
+(function productionClient(){
   const params=new URLSearchParams(location.search);
   const demoMode=params.get('demo')==='1';
   const gate=document.getElementById('productionGate');
   let saveTimer=null;
   let lastSaveSignature='';
   let currentUser=null;
+  let appLoaded=false;
 
   function esc(v=''){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
   function showGate(html){if(!gate)return;gate.hidden=false;gate.innerHTML=html;document.body.classList.add('production-check')}
@@ -16,14 +17,28 @@
     return {r,data};
   }
 
+  async function loadApp(){
+    if(appLoaded&&window.RecallyaApp)return window.RecallyaApp;
+    try{
+      await import('/app.js?v=3.0.2');
+      appLoaded=true;
+      if(!window.RecallyaApp)throw new Error('Recallya app bridge did not initialize');
+      return window.RecallyaApp;
+    }catch(e){
+      showGate(`<main class="prod-gate-card"><div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Production</small></div></div><p class="eyebrow">APP STARTUP ERROR</p><h1>Recallya could not start the application shell.</h1><p>${esc(e?.message||'Unknown startup error')}</p><button class="primary-btn" onclick="location.reload()">Reload</button></main>`);
+      throw e;
+    }
+  }
+
   function setupGate(){
     showGate(`<main class="prod-gate-card">
       <div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Production setup</small></div></div>
       <p class="eyebrow">REAL APP MODE</p>
-      <h1>The interface is ready. The production database still needs to be connected.</h1>
-      <p>Recallya will no longer pretend browser demo data is a real account. Once Supabase credentials are connected, this screen becomes signup and every workspace saves to the database.</p>
-      <div class="prod-gate-actions"><a class="primary-btn" href="?demo=1">Open sample demo</a></div>
-      <small class="prod-note">Demo mode is now explicit. It is not production data.</small>
+      <h1>Connect the production database to activate Recallya.</h1>
+      <p>The seeded CRM is no longer the default app. Production is waiting for account storage and authentication so real users start with clean workspaces and persistent data.</p>
+      <div class="prod-status-grid"><div><b>Application</b><span>Ready</span></div><div><b>Database</b><span>Not connected</span></div><div><b>Authentication</b><span>Not connected</span></div></div>
+      <div class="prod-gate-actions"><a class="soft-btn" href="?demo=1">Explore sample demo</a></div>
+      <small class="prod-note">Sample data only loads when you explicitly choose demo mode.</small>
     </main>`);
   }
 
@@ -60,7 +75,7 @@
     };
   }
 
-  function installSignOut(){
+  function installSignOut(app){
     if(document.getElementById('productionSignOut'))return;
     const footer=document.querySelector('.nav-footer');if(!footer)return;
     const b=document.createElement('button');b.id='productionSignOut';b.className='soft-btn prod-signout';b.textContent='Sign out';
@@ -90,7 +105,7 @@
     return data.workspace;
   }
 
-  function installWorkspaceCreate(){
+  function installWorkspaceCreate(app){
     const form=document.getElementById('newWorkspaceForm');if(!form||form.dataset.productionBound)return;form.dataset.productionBound='1';
     form.onsubmit=async e=>{
       e.preventDefault();
@@ -98,25 +113,33 @@
       const w=await createWorkspace({name:document.getElementById('newWorkspaceName').value.trim(),type:document.getElementById('newWorkspaceType').value,category:document.getElementById('newWorkspaceCategory').value.trim(),website:document.getElementById('newWorkspaceWebsite').value.trim(),goal:document.getElementById('newWorkspaceGoal').value.trim()||'Convert conversations'});
       btn.disabled=false;btn.textContent='Create business';
       if(!w)return;
-      window.RecallyaApp.addProductionWorkspace(w);
-      document.getElementById('newWorkspaceDialog').close();form.reset();window.RecallyaApp.toast(`${w.name} workspace created`);
+      app.addProductionWorkspace(w);
+      document.getElementById('newWorkspaceDialog').close();form.reset();app.toast(`${w.name} workspace created`);
     };
   }
 
   async function boot(){
-    if(demoMode){hideGate();document.body.classList.add('demo-mode');return}
-    const app=window.RecallyaApp;
-    if(!app){window.addEventListener('recallya:app-ready',boot,{once:true});return}
-    showGate('<main class="prod-gate-card loading-card"><div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Loading your business…</small></div></div><div class="prod-loader"></div></main>');
+    if(demoMode){
+      showGate('<main class="prod-gate-card loading-card"><div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Loading sample workspace…</small></div></div><div class="prod-loader"></div></main>');
+      await loadApp();
+      document.body.classList.add('demo-mode');
+      hideGate();
+      return;
+    }
+
+    showGate('<main class="prod-gate-card loading-card"><div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Loading your account…</small></div></div><div class="prod-loader"></div></main>');
     const {r,data}=await jsonFetch('/api/bootstrap');
     if(r.status===503||data.error==='production_not_configured'){setupGate();return}
     if(r.status===401){authGate();return}
     if(!r.ok){showGate(`<main class="prod-gate-card"><h1>Recallya could not load your account.</h1><p>${esc(data.detail||data.error||'Unknown error')}</p><button class="primary-btn" onclick="location.reload()">Try again</button></main>`);return}
+
     currentUser=data.user;
+    const app=await loadApp();
     app.setProductionPortfolio(data.workspaces,data.activeWorkspaceId);
-    installSignOut();installWorkspaceCreate();hideGate();
+    installSignOut(app);installWorkspaceCreate(app);
     document.querySelector('.avatar-btn')?.setAttribute('title',data.user?.email||'Signed in');
     document.body.classList.add('production-live');
+    hideGate();
   }
 
   window.RecallyaProduction={queueSave,createWorkspace,get user(){return currentUser},get live(){return Boolean(currentUser)}};
