@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       feetfinderApprovedAdapter: Boolean(process.env.FEETFINDER_APPROVED_WEBHOOK_URL),
       slushyApprovedAdapter: Boolean(process.env.SLUSHY_APPROVED_WEBHOOK_URL),
       externalTextProvider: Boolean(process.env.EXTERNAL_TEXT_PROVIDER_URL),
-      rougeExternalProvider: Boolean(process.env.ROUGE_PROVIDER_URL)
+      rogueExternalProvider: Boolean(process.env.ROGUE_PROVIDER_URL)
     },
     ...(aiCheck ? { aiCheck } : {})
   });

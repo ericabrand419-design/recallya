@@ -18,7 +18,7 @@ function blankState(ownerName='Owner') {
       {id:'sales',name:'Sales',use:'Sales',directness:78,warmth:68,formality:50,sales:80,description:'Clear, useful and commercially aware without sounding automated.',samples:[],avoid:[],cta:'One concrete next step',locked:false},
       {id:'support',name:'Support',use:'Support',directness:65,warmth:82,formality:55,sales:20,description:'Helpful, calm and focused on resolving the customer’s issue.',samples:[],avoid:[],cta:'Confirm resolution',locked:false},
       {id:'social',name:'Brand Social',use:'Social / public posts',directness:74,warmth:72,formality:35,sales:60,description:'Conversational brand voice for public content.',samples:[],avoid:[],cta:'Low-friction action',locked:false},
-      {id:'rouge',name:'Recallya Rouge',use:'Rouge provider',directness:70,warmth:80,formality:20,sales:75,description:'Optional 18+ add-on voice. Separate provider and boundaries.',samples:[],avoid:[],cta:'Configured by creator',locked:true}
+      {id:'rogue',name:'Recallya Rogue',use:'Rogue provider',directness:70,warmth:80,formality:20,sales:75,description:'Optional 18+ add-on voice. Separate provider and boundaries.',samples:[],avoid:[],cta:'Configured by creator',locked:true}
     ],
     channels:[
       {id:'email',name:'Email',status:'Disconnected',policy:'Approval',voiceId:'sales'},
@@ -28,7 +28,7 @@ function blankState(ownerName='Owner') {
       {id:'website',name:'Website',status:'Ready',policy:'Auto',voiceId:'sales'}
     ],
     automationRules:[],
-    rouge:{enabled:false,voiceId:'rouge',provider:'',endpoint:'',boundaries:'18+ only. Respect opt-outs. Never infer age. Never send mature content unsolicited.',mode:'Approval',custom:'Always require human approval'},
+    rogue:{enabled:false,voiceId:'rogue',provider:'',endpoint:'',boundaries:'18+ only. Respect opt-outs. Never infer age. Never send mature content unsolicited.',mode:'Approval',custom:'Always require human approval'},
     teamMembers:[{id:'owner',name:ownerName,role:'Owner',access:'Portfolio owner',status:'active',avatar:initials(ownerName)}],
     workflows:[],
     deliverability:{status:'Not connected',bounceRate:'—',suppressed:0,dailyLimit:0,sentToday:0},

@@ -33,8 +33,8 @@ export default async function handler(req,res){
   const thread=Array.isArray(body.conversation?.messages)?body.conversation.messages.slice(-14):[];
   const threadText=thread.map(m=>String(m?.text||'')).join(' ');
   if(hasMinorSignal(message)||hasMinorSignal(threadText)) return json(res,400,{error:'minor_related_mature_content_blocked'});
-  if(body.surface==='rouge') {
-    return json(res,200,{ok:false,requires_external_provider:true,reason:'rouge_generation_is_external',note:'Core supplies memory, voice settings, boundaries and approval controls. Configure an approved external adult-capable provider for mature dialogue.'});
+  if(body.surface==='rogue') {
+    return json(res,200,{ok:false,requires_external_provider:true,reason:'rogue_generation_is_external',note:'Core supplies memory, voice settings, boundaries and approval controls. Configure an approved external adult-capable provider for mature dialogue.'});
   }
 
   // AI drafting is for signed-in accounts only; the public demo keeps the rules-based drafts.
