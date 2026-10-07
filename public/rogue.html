@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#081b3a" />
   <meta name="description" content="Recallya — agent-first relationship intelligence. Conversations that convert." />
-  <title>Recallya — Conversations that convert.</title>
+  <title>Recallya Rogue — Conversations that convert.</title>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="stylesheet" href="/styles.css" />
+  <meta name="recallya-entry" content="rogue" />
 </head>
-<body class="production-check">
-  <div id="productionGate" class="production-gate" aria-live="polite"><main class="prod-gate-card loading-card"><div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Loading production…</small></div></div><div class="prod-loader"></div></main></div>
+<body>
   <div class="app-shell">
     <aside class="desktop-nav" aria-label="Primary navigation">
       <div class="brand-lockup">
@@ -123,60 +123,6 @@
         </div>
       </section>
 
-
-      <section class="view rogue-console-view" id="rogue-view">
-        <div class="rogue-console-shell">
-          <article class="rogue-console-hero">
-            <div class="rogue-console-brand">
-              <div class="rogue-console-mark">R</div>
-              <div>
-                <span class="rogue-console-kicker">RECALLYA ROGUE · 18+ CREATOR RELATIONSHIP INTELLIGENCE</span>
-                <h2>Your conversations, memory and selling context in one place.</h2>
-                <p>Rogue keeps the relationship human while carrying customer context, voice, boundaries, follow-up and approved automation.</p>
-              </div>
-            </div>
-            <div class="rogue-console-actions">
-              <button class="rogue-primary" id="rogueInboxBtn">Open conversations</button>
-              <button class="rogue-secondary" id="rogueConfigureTopBtn">Rogue settings</button>
-            </div>
-          </article>
-
-          <div class="rogue-status-strip">
-            <article><span>ROGUE</span><b id="rogueConsoleStatus">Configured</b><small id="rogueConsoleMode">Approval mode</small></article>
-            <article><span>PROVIDER</span><b id="rogueProviderStatus">Not connected</b><small>Separate mature-content engine</small></article>
-            <article><span>CUSTOMERS</span><b id="rogueCustomerCount">0</b><small>relationship memories</small></article>
-            <article><span>RELATIONSHIP VALUE</span><b id="rogueRevenueMetric">$0</b><small>recorded in this workspace</small></article>
-          </div>
-
-          <div class="rogue-console-grid">
-            <article class="rogue-panel rogue-conversations-panel">
-              <div class="rogue-panel-head"><div><span>CONVERSATIONS</span><h3>Who needs attention?</h3></div><button id="rogueViewInboxBtn">View inbox</button></div>
-              <div id="rogueConversationList" class="rogue-conversation-list"></div>
-            </article>
-
-            <article class="rogue-panel">
-              <div class="rogue-panel-head"><div><span>RELATIONSHIP MEMORY</span><h3>Know who you are talking to.</h3></div><button id="roguePeopleBtn">People</button></div>
-              <div id="rogueRelationshipList" class="rogue-relationship-list"></div>
-            </article>
-
-            <article class="rogue-panel">
-              <div class="rogue-panel-head"><div><span>VOICE</span><h3>How Rogue talks for you.</h3></div><button id="rogueVoiceBtn">Voice Studio</button></div>
-              <div id="rogueVoiceSummary" class="rogue-voice-summary"></div>
-            </article>
-
-            <article class="rogue-panel">
-              <div class="rogue-panel-head"><div><span>BOUNDARIES & CONTROL</span><h3>What Rogue may do.</h3></div><button id="rogueControlBtn">Configure</button></div>
-              <div id="rogueBoundarySummary" class="rogue-boundary-summary"></div>
-            </article>
-
-            <article class="rogue-panel rogue-wide">
-              <div class="rogue-panel-head"><div><span>SELLING INTELLIGENCE</span><h3>Always selling. Never blindly spamming.</h3></div><button id="roguePublisherBtn">Publisher</button></div>
-              <div id="rogueSellingSummary" class="rogue-selling-summary"></div>
-            </article>
-          </div>
-        </div>
-      </section>
-
       <section class="view" id="more-view">
         <div class="feature-launch-grid">
           <button class="feature-launch portfolio" id="openWorkspaceSettingsBtn"><span class="feature-icon">▦</span><span><b>Business & Portfolio</b><small>Workspace identity, products, goals and multi-business control.</small></span><em id="workspaceLaunchStatus">3 workspaces</em></button>
@@ -279,6 +225,6 @@ Two-location pilot | $18,000"></textarea><small>One per line. Use “Name | Pric
   <dialog id="teamDialog" class="modal-dialog wide-dialog"><div class="modal-shell"><div class="modal-head"><div><p class="eyebrow">TEAM & HANDOFFS</p><h2>People who can own relationships</h2></div><button class="icon-btn" type="button" data-close="teamDialog">×</button></div><div id="teamMemberList" class="team-member-list"></div><form id="teamForm" class="form-stack team-form"><label>Name<input id="teamName" required placeholder="Team member name" /></label><label>Role<input id="teamRole" placeholder="Sales, Support, Manager..." /></label><label>Access<select id="teamAccess"><option>Active workspace</option><option>Assigned records</option><option>Portfolio owner</option></select></label><button class="primary-btn" type="submit">Add team member</button></form></div></dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="/production.js"></script>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
