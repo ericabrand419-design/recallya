@@ -1,4 +1,5 @@
-import { json, readJson, callExternalTextProvider } from './_util.js';
+import { json, readJson } from './_util.js';
+import { claude, signedInUser, clip } from './_ai.js';
 
 function fallback(question, person, state={}) {
   const q = String(question || '').toLowerCase();
@@ -18,12 +19,42 @@ function fallback(question, person, state={}) {
   return 'The clearest next step is to resolve the specific dependency in each active relationship, then move it to a concrete commitment such as a reply, meeting, proposal or decision.';
 }
 
-export default async function handler(req,res){
-  if(req.method!=='POST') return json(res,405,{error:'method_not_allowed'});
-  const body=await readJson(req);
-  const question=String(body.question||'').trim();
-  if(!question) return json(res,400,{error:'question_required'});
-  const provider=await callExternalTextProvider({message:question,context:{surface:'ask-recallya',person:body.person||null,crmState:body.state||{}}});
-  if(provider.ok){const d=provider.data||{};const answer=d.answer||d.reply||d.text||d.output;if(answer)return json(res,200,{answer:String(answer),source:'provider'});}
-  return json(res,200,{answer:fallback(question,body.person,body.state),source:'recallya_demo_engine'});
+function compactPerson(p = {}) {
+  return {
+    name: p.name, company: p.company, role: p.role, email: p.email, stage: p.stage, status: p.status,
+    value: p.value, lastContact: p.lastContact, summary: p.summary, nextAction: p.nextAction, nextWhy: p.nextWhy,
+    preferences: p.preferences, objections: p.objections, promises: p.promises, purchases: p.purchases,
+    memory: Array.isArray(p.memory) ? p.memory.slice(-15) : p.memory,
+    relationshipReason: p.relationshipReason
+  };
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
+  const body = await readJson(req);
+  const question = String(body.question || '').trim().slice(0, 2000);
+  if (!question) return json(res, 400, { error: 'question_required' });
+
+  // AI answers are for signed-in accounts only, so the public demo can never spend AI credits.
+  const user = await signedInUser(req, res);
+  if (user) {
+    const state = body.state || {};
+    const workspace = body.workspace || {};
+    const people = (Array.isArray(state.people) ? state.people : []).slice(0, 150).map(compactPerson);
+    const system = [
+      `You are Ask Recallya, the relationship assistant inside Recallya for the business "${String(workspace.name || 'this business').slice(0, 120)}"${workspace.category ? ` (${String(workspace.category).slice(0, 120)})` : ''}.`,
+      workspace.goal ? `The business goal is: ${String(workspace.goal).slice(0, 300)}.` : '',
+      'Answer the owner\'s question using only the CRM data provided. Be direct and specific: name the people, amounts and the concrete next step.',
+      'If the data does not contain the answer, say exactly what is missing and how to add it in Recallya (import contacts, add context to a person, connect email).',
+      'Keep answers under 160 words unless the owner asks for more. Plain text only, no markdown headings. Short lists are fine.'
+    ].filter(Boolean).join(' ');
+    const userPrompt = [
+      body.person ? `FOCUS PERSON:\n${clip(compactPerson(body.person), 8000)}` : '',
+      `CRM DATA:\n${clip({ people, promises: state.promises, agenda: state.agenda, campaigns: state.campaigns, products: workspace.products }, 40000)}`,
+      `QUESTION: ${question}`
+    ].filter(Boolean).join('\n\n');
+    const ai = await claude({ req, tier: 'smart', system, user: userPrompt, maxTokens: 700 });
+    if (ai.ok && ai.text) return json(res, 200, { answer: ai.text, source: 'claude', model: ai.model });
+  }
+  return json(res, 200, { answer: fallback(question, body.person, body.state), source: 'recallya_rules' });
 }

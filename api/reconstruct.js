@@ -1,4 +1,5 @@
-import { json, readJson, callExternalTextProvider } from './_util.js';
+import { json, readJson } from './_util.js';
+import { claude, extractJson, signedInUser, clip } from './_ai.js';
 
 const STAGES = ['New lead','Nurturing','Opportunity','Proposal','Decision','Customer','Past customer','Dormant','Do not contact'];
 
@@ -92,25 +93,34 @@ export default async function handler(req,res){
     lastContact:String(c.lastContact||'').slice(0,120)
   }));
 
-  const provider=await callExternalTextProvider({
-    mode:'relationship_reconstruction',
-    message:'Reconstruct each customer relationship. Return JSON with a relationships array. For every item return id, stage (New lead, Nurturing, Opportunity, Proposal, Decision, Customer, Past customer, Dormant, or Do not contact), lifecycle, confidence 0-100, reason, evidence [{source,detail}], and needsReview. Never invent facts. Distinguish explicit evidence from inference.',
-    context:{contacts:compact}
-  });
-
+  // AI reconstruction is for signed-in accounts only; otherwise the deterministic rules run.
   let aiItems=null;
-  if(provider.ok){
-    const d=provider.data;
-    aiItems=d?.relationships || d?.data?.relationships || d?.output?.relationships || null;
-    if(typeof d?.text==='string'){
-      try{aiItems=JSON.parse(d.text).relationships}catch{}
+  const user=await signedInUser(req,res);
+  if(user){
+    const system=[
+      'You reconstruct where each customer relationship stands for a small business CRM.',
+      `For every contact return: id (unchanged), stage (exactly one of: ${STAGES.join(', ')}), lifecycle (Lead, Opportunity, Customer or Inactive), confidence (0 to 100), reason (one sentence), evidence (array of {source, detail} quoting or closely paraphrasing the contact data), needsReview (true when confidence is under 80 or the evidence conflicts).`,
+      'Base every judgement only on the data given. Distinguish explicit evidence from inference, and lower confidence when you are inferring. Sparse records should be New lead with low confidence and needsReview true.',
+      'Respond with only a JSON object of the form {"relationships":[...]} and nothing else.'
+    ].join(' ');
+    const chunks=[];
+    for(let i=0;i<compact.length;i+=25) chunks.push(compact.slice(i,i+25));
+    const results=await Promise.all(chunks.map(chunk=>claude({req,tier:'fast',system,user:`CONTACTS:\n${clip(chunk,60000)}`,maxTokens:6000,temperature:0})));
+    const merged=[];
+    for(const r of results){
+      const parsed=r.ok?extractJson(r.text):null;
+      if(Array.isArray(parsed?.relationships)) merged.push(...parsed.relationships);
     }
+    if(merged.length) aiItems=merged;
   }
-  const reconstructed=sanitizeAI(aiItems,compact) || compact.map(c=>({id:c.id,...heuristic(c)}));
+  const fromAI=sanitizeAI(aiItems,compact)||[];
+  const covered=new Set(fromAI.map(x=>x.id));
+  // Anything the model skipped still gets a rules-based answer, so no contact is left unplaced.
+  const reconstructed=[...fromAI,...compact.filter(c=>!covered.has(c.id)).map(c=>({id:c.id,...heuristic(c)}))];
   return json(res,200,{
     ok:true,
     engine:aiItems?'ai':'rules_fallback',
     reconstructed,
-    note:aiItems?'External AI provider used with source-constrained instructions.':'External AI provider is not configured, so Recallya used its deterministic reconstruction rules.'
+    note:aiItems?'Claude reconstructed these relationships from your records only.':'Recallya used its built-in reconstruction rules.'
   });
 }
