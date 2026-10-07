@@ -73,5 +73,17 @@
     "api/*.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "redirects": [
+    {
+      "source": "/rouge",
+      "destination": "/rogue",
+      "permanent": true
+    },
+    {
+      "source": "/rouge.html",
+      "destination": "/rogue",
+      "permanent": true
+    }
+  ]
 }

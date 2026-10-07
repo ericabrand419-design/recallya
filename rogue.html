@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#081b3a" />
+  <meta name="description" content="Recallya — agent-first relationship intelligence. Conversations that convert." />
+  <title>Recallya Rogue — Conversations that convert.</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/styles.css" />
+  <meta name="recallya-entry" content="rogue" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="desktop-nav" aria-label="Primary navigation">
+      <div class="brand-lockup">
+        <div class="brand-mark" aria-hidden="true"><span>R</span></div>
+        <div><strong>Recallya</strong><small>Conversations that convert.</small></div>
+      </div>
+      <div class="workspace-switcher" id="workspaceSwitcher">
+        <button class="workspace-switcher-btn" id="workspaceSwitcherBtn" type="button">
+          <span class="workspace-avatar" id="workspaceAvatar">AF</span>
+          <span><small>WORKSPACE</small><b id="workspaceName">Agent First</b></span>
+          <span class="workspace-chevron">⌄</span>
+        </button>
+      </div>
+      <nav class="nav-stack">
+        <button class="nav-item" data-view="portfolio"><span class="nav-icon">▦</span>Portfolio</button>
+        <button class="nav-item active" data-view="today"><span class="nav-icon">⌂</span>Today</button>
+        <button class="nav-item" data-view="inbox"><span class="nav-icon">✉</span>Inbox <span class="nav-count" id="inboxBadge">3</span></button>
+        <button class="nav-item" data-view="people"><span class="nav-icon">◎</span>People</button>
+        <button class="nav-item" data-view="ask"><span class="nav-icon">✦</span>Ask Recallya</button>
+        <button class="nav-item" data-view="more"><span class="nav-icon">•••</span>More</button>
+      </nav>
+      <div class="nav-footer">
+        <div class="autopilot-mini"><span class="live-dot"></span><div><b>Recallya active</b><small id="automationMiniText">Approved automations only</small></div></div>
+        <button class="kill-switch" id="globalKillSwitch">Pause automations</button>
+      </div>
+    </aside>
+
+    <main class="main-stage">
+      <header class="mobile-header">
+        <div class="brand-lockup compact"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Conversations that convert.</small></div></div>
+        <button class="mobile-workspace-btn" id="mobileWorkspaceBtn" type="button"><span id="mobileWorkspaceName">Agent First</span><i>⌄</i></button>
+        <button class="avatar-btn" aria-label="Profile">EL</button>
+      </header>
+
+      <header class="page-header">
+        <div><p class="eyebrow" id="pageEyebrow">YOUR RELATIONSHIPS, READY TO MOVE</p><h1 id="pageTitle">Today</h1></div>
+        <div class="header-actions"><button class="soft-btn" id="quickCaptureBtn">+ Capture</button><button class="primary-btn" id="headerAskBtn">Ask Recallya</button></div>
+      </header>
+
+
+      <section class="view" id="portfolio-view">
+        <article class="portfolio-hero">
+          <div><p class="eyebrow">OWNER VIEW</p><h2>Everything that needs you, across every business.</h2><p>Each workspace stays isolated. Portfolio only rolls up the signals you have permission to see.</p></div>
+          <button class="primary-btn" id="addWorkspaceBtn">+ Add business</button>
+        </article>
+        <div class="portfolio-metrics" id="portfolioMetrics"></div>
+        <div class="portfolio-layout">
+          <article class="panel"><div class="panel-head"><div><p class="eyebrow">YOUR BUSINESSES</p><h2>Workspaces</h2></div><button class="soft-btn small" id="managePortfolioBtn">Manage</button></div><div id="workspaceCards" class="workspace-card-grid"></div></article>
+          <article class="panel portfolio-ask"><div class="panel-head"><div><p class="eyebrow">ASK ACROSS BUSINESSES</p><h2>Ask Portfolio</h2></div></div><p class="panel-copy">Use this only when you intentionally want a cross-business answer. Normal Ask Recallya remains scoped to the active workspace.</p><div class="prompt-grid compact" id="portfolioPrompts"><button>What needs my attention across all businesses?</button><button>Which business has the most pipeline?</button><button>What promises are due across everything?</button></div><div id="portfolioAskHistory" class="ask-history compact"></div><form id="portfolioAskForm" class="ask-composer"><input id="portfolioAskInput" placeholder="Ask across your portfolio..." /><button class="primary-btn">Ask</button></form></article>
+        </div>
+      </section>
+
+      <section class="view active" id="today-view">
+        <article class="hero-card">
+          <div><span class="hero-kicker">AGENT-FIRST RELATIONSHIP INTELLIGENCE</span><h2>Three relationships need you.<br><span>Recallya handled the rest.</span></h2><p>Memory, follow-up, selling cues and next actions are already organized around the work.</p></div>
+          <div class="hero-stat"><strong id="handledCount">14</strong><span>handled while<br>you were away</span></div>
+        </article>
+
+        <div class="metric-strip">
+          <button class="metric-card"><span>Promises due</span><strong id="promiseMetric">3</strong><small>1 needs you</small></button>
+          <button class="metric-card"><span>Meetings</span><strong id="meetingMetric">2</strong><small>briefs ready</small></button>
+          <button class="metric-card"><span>Open pipeline</span><strong id="pipelineMetric">$42.8k</strong><small>active opportunities</small></button>
+          <button class="metric-card"><span>Conversations moved</span><strong id="movedMetric">17</strong><small>this week</small></button>
+        </div>
+
+        <div class="content-grid two-one">
+          <article class="panel priority-panel"><div class="panel-head"><div><p class="eyebrow">NEEDS YOU</p><h2>Priority relationships</h2></div><button class="text-btn" data-nav="people">View all</button></div><div id="priorityList" class="priority-list"></div></article>
+          <article class="panel next-panel"><div class="panel-head"><div><p class="eyebrow">NEXT BEST ACTION</p><h2 id="nbaName">Lakeshore Auto Group</h2></div><span class="signal-pill">High intent</span></div><div class="next-action-card"><div class="action-icon">✦</div><div><b id="nbaAction">Send revised two-location pilot proposal</b><p id="nbaWhy"></p></div></div><div class="button-row wrap"><button class="primary-btn" id="doItBtn">Do it</button><button class="soft-btn" id="draftItBtn">Draft it</button><button class="soft-btn" id="scheduleItBtn">Schedule</button><button class="why-link" id="whyItBtn">Why this?</button></div></article>
+        </div>
+
+        <div class="content-grid half">
+          <article class="panel"><div class="panel-head"><div><p class="eyebrow">RECALLYA HEARD IT</p><h2>Promises & commitments</h2></div><span class="count-pill" id="promiseCount">3</span></div><div id="promiseList" class="simple-list"></div></article>
+          <article class="panel"><div class="panel-head"><div><p class="eyebrow">UP NEXT</p><h2>Calendar & tasks</h2></div><button class="text-btn" id="addActionBtn">Add from conversation</button></div><div id="agendaList" class="simple-list"></div></article>
+        </div>
+
+        <article class="panel command-panel">
+          <div class="command-copy"><div class="spark-orb">✦</div><div><p class="eyebrow">SAY IT ONCE</p><h2>Turn conversation into action</h2><p>Tell Recallya what happened. It will update memory, create tasks or calendar items and preserve the sales context.</p></div></div>
+          <form id="captureForm" class="command-bar"><input id="captureInput" autocomplete="off" placeholder='Try: “Marissa wants the pilot. Send pricing tomorrow and remind me Friday if she hasn’t replied.”' /><button class="primary-btn" type="submit">Capture</button></form>
+          <div id="captureResult" class="capture-result" hidden></div>
+        </article>
+      </section>
+
+      <section class="view" id="inbox-view">
+        <div class="inbox-shell panel no-pad">
+          <aside class="thread-column"><div class="inbox-toolbar"><div><p class="eyebrow">SMART INBOX</p><h2>Conversations</h2></div><button class="icon-btn">⌕</button></div><div class="inbox-tabs"><button class="active">Needs me</button><button>Handled</button><button>Waiting</button></div><div id="threadList" class="thread-list"></div></aside>
+          <section class="conversation-column">
+            <div id="conversationEmpty" class="empty-state"><div class="spark-orb">✦</div><h3>Select a conversation</h3><p>Recallya brings the relationship context, selected voice and sales goal with it.</p></div>
+            <div id="conversationActive" hidden>
+              <div class="conversation-head"><div><button class="mobile-back" id="inboxBack">‹</button><b id="convName"></b><span id="convMeta"></span></div><div class="button-row"><select id="conversationVoice" class="mode-select"></select><select id="convMode" class="mode-select"><option>Autopilot</option><option selected>Approval</option><option>Human</option></select><button class="soft-btn small" id="openCustomerBtn">View person</button></div></div>
+              <div class="conversation-body"><div class="messages" id="messages"></div><aside class="context-rail" id="contextRail"></aside></div>
+              <div class="composer"><textarea id="replyText" placeholder="Reply, or ask Recallya to draft from context and your voice..."></textarea><div class="composer-bottom"><div class="button-row"><button class="soft-btn small" id="suggestReplyBtn">✦ Draft in my voice</button><button class="soft-btn small" id="salesReplyBtn">$ Find natural offer</button></div><button class="primary-btn" id="sendReplyBtn">Send</button></div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="people-view">
+        <article class="panel people-panel">
+          <div class="panel-head people-head"><div><p class="eyebrow">RELATIONSHIP MEMORY</p><h2>People & companies</h2></div><div class="people-head-actions"><div class="search-wrap"><span>⌕</span><input id="peopleSearch" placeholder="Search people, company or context" /></div><button class="soft-btn small" id="importLeadsBtn">Import CSV</button><button class="primary-btn small" id="addLeadBtn">+ Add lead</button></div></div>
+          <div class="lead-intake-strip"><div><span class="lead-intake-icon">↘</span><div><b>Lead intake is active</b><small>New contacts become relationship records with source, context and first action.</small></div></div><div class="lead-source-summary" id="leadSourceSummary"></div></div>
+          <div class="people-filters"><button class="active" data-people-filter="all">All</button><button data-people-filter="lead">New leads</button><button data-people-filter="hot">High intent</button><button data-people-filter="stalled">Stalled</button><button data-people-filter="customer">Customers</button></div>
+          <div id="peopleList" class="people-list"></div>
+        </article>
+      </section>
+
+      <section class="view" id="ask-view">
+        <div class="ask-layout">
+          <article class="ask-main panel"><div class="ask-hero"><div class="ask-orb">R</div><p class="eyebrow">ASK ACROSS YOUR CRM</p><h2>What do you need to know?</h2><p>Ask about a person, company, pipeline, promises, campaign or what should happen next.</p></div><div class="prompt-grid" id="globalPrompts"><button>Who needs a follow-up today?</button><button>What promises are overdue?</button><button>Where is the next natural sale?</button><button>What am I forgetting?</button></div><div id="globalAskHistory" class="ask-history"></div><form id="globalAskForm" class="ask-composer"><input id="globalAskInput" autocomplete="off" placeholder="Ask Recallya anything about your relationships..." /><button class="primary-btn" type="submit">Ask</button></form></article>
+          <aside class="panel insight-panel"><p class="eyebrow">TODAY'S SIGNALS</p><h3>Recallya noticed</h3><div class="insight-item"><span class="signal-icon">↗</span><div><b>Expansion interest resurfaced</b><p>Two dealership prospects mentioned multi-location rollout this week.</p></div></div><div class="insight-item"><span class="signal-icon">!</span><div><b>One promise at risk</b><p>You told Devon you would send implementation timing before tomorrow.</p></div></div><div class="insight-item"><span class="signal-icon">$</span><div><b>Natural upsell opportunity</b><p>Heritage Motor Group asked about onboarding support after reviewing the pilot.</p></div></div></aside>
+        </div>
+      </section>
+
+
+      <section class="view rogue-console-view" id="rogue-view">
+        <div class="rogue-console-shell">
+          <article class="rogue-console-hero">
+            <div class="rogue-console-brand">
+              <div class="rogue-console-mark">R</div>
+              <div>
+                <span class="rogue-console-kicker">RECALLYA ROGUE · 18+ CREATOR RELATIONSHIP INTELLIGENCE</span>
+                <h2>Your conversations, memory and selling context in one place.</h2>
+                <p>Rogue keeps the relationship human while carrying customer context, voice, boundaries, follow-up and approved automation.</p>
+              </div>
+            </div>
+            <div class="rogue-console-actions">
+              <button class="rogue-primary" id="rogueInboxBtn">Open conversations</button>
+              <button class="rogue-secondary" id="rogueConfigureTopBtn">Rogue settings</button>
+            </div>
+          </article>
+
+          <div class="rogue-status-strip">
+            <article><span>ROGUE</span><b id="rogueConsoleStatus">Configured</b><small id="rogueConsoleMode">Approval mode</small></article>
+            <article><span>PROVIDER</span><b id="rogueProviderStatus">Not connected</b><small>Separate mature-content engine</small></article>
+            <article><span>CUSTOMERS</span><b id="rogueCustomerCount">0</b><small>relationship memories</small></article>
+            <article><span>RELATIONSHIP VALUE</span><b id="rogueRevenueMetric">$0</b><small>recorded in this workspace</small></article>
+          </div>
+
+          <div class="rogue-console-grid">
+            <article class="rogue-panel rogue-conversations-panel">
+              <div class="rogue-panel-head"><div><span>CONVERSATIONS</span><h3>Who needs attention?</h3></div><button id="rogueViewInboxBtn">View inbox</button></div>
+              <div id="rogueConversationList" class="rogue-conversation-list"></div>
+            </article>
+
+            <article class="rogue-panel">
+              <div class="rogue-panel-head"><div><span>RELATIONSHIP MEMORY</span><h3>Know who you are talking to.</h3></div><button id="roguePeopleBtn">People</button></div>
+              <div id="rogueRelationshipList" class="rogue-relationship-list"></div>
+            </article>
+
+            <article class="rogue-panel">
+              <div class="rogue-panel-head"><div><span>VOICE</span><h3>How Rogue talks for you.</h3></div><button id="rogueVoiceBtn">Voice Studio</button></div>
+              <div id="rogueVoiceSummary" class="rogue-voice-summary"></div>
+            </article>
+
+            <article class="rogue-panel">
+              <div class="rogue-panel-head"><div><span>BOUNDARIES & CONTROL</span><h3>What Rogue may do.</h3></div><button id="rogueControlBtn">Configure</button></div>
+              <div id="rogueBoundarySummary" class="rogue-boundary-summary"></div>
+            </article>
+
+            <article class="rogue-panel rogue-wide">
+              <div class="rogue-panel-head"><div><span>SELLING INTELLIGENCE</span><h3>Always selling. Never blindly spamming.</h3></div><button id="roguePublisherBtn">Publisher</button></div>
+              <div id="rogueSellingSummary" class="rogue-selling-summary"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="more-view">
+        <div class="feature-launch-grid">
+          <button class="feature-launch portfolio" id="openWorkspaceSettingsBtn"><span class="feature-icon">▦</span><span><b>Business & Portfolio</b><small>Workspace identity, products, goals and multi-business control.</small></span><em id="workspaceLaunchStatus">3 workspaces</em></button>
+          <button class="feature-launch publisher" id="openPublisherBtn"><span class="feature-icon">↗</span><div><b>Publisher</b><small>Create once. Adapt by channel. Track what converts.</small></div><em id="publisherLaunchStatus">2 scheduled</em></button>
+          <button class="feature-launch voice" id="openVoiceStudioBtn"><span class="feature-icon">◉</span><div><b>Voice Studio</b><small>Teach Recallya how you and your brands actually sound.</small></div><em id="voiceLaunchStatus">4 voices</em></button>
+          <button class="feature-launch automations" id="openAutomationCenterBtn"><span class="feature-icon">⚡</span><div><b>Automation Center</b><small>Control what Recallya may do without asking.</small></div><em>Rules</em></button>
+          <button class="feature-launch trust" type="button" onclick="document.getElementById('trustCenter').scrollIntoView({behavior:'smooth',block:'start'})"><span class="feature-icon">✓</span><div><b>Trust & Team</b><small>Source-backed memory, handoffs, consent, workflows and data control.</small></div><em>2.2</em></button>
+        </div>
+
+        <div class="more-grid">
+          <article class="panel publisher-panel wide-panel">
+            <div class="panel-head"><div><p class="eyebrow">RECALLYA PUBLISHER</p><h2>One campaign. Every approved channel.</h2></div><button class="primary-btn small" id="newCampaignBtn">+ New campaign</button></div>
+            <p class="panel-copy">Recallya adapts the message to each channel, applies the right voice and routes replies back into relationship memory.</p>
+            <div class="publisher-summary" id="publisherSummary"></div>
+            <div id="campaignList" class="campaign-list"></div>
+          </article>
+
+          <article class="panel voice-panel wide-panel">
+            <div class="panel-head"><div><p class="eyebrow">RECALLYA VOICE</p><h2>Talk like you, not like software.</h2></div><button class="primary-btn small" id="newVoiceBtn">+ New voice</button></div>
+            <p class="panel-copy">Each channel can use a different voice while keeping the same customer memory and sales context.</p>
+            <div id="voiceProfileList" class="voice-profile-list"></div>
+          </article>
+
+          <article class="panel wide-panel business-profile-panel">
+            <div class="panel-head"><div><p class="eyebrow">ACTIVE BUSINESS</p><h2 id="businessProfileName">Agent First</h2></div><button class="soft-btn small" id="editWorkspaceBtn">Edit business</button></div>
+            <div class="business-profile-grid"><div><span>Category</span><b id="businessCategory">Consulting / SaaS</b></div><div><span>Primary goal</span><b id="businessGoal">Book consultations and close pilots</b></div><div><span>Website</span><b id="businessWebsite">Not connected</b></div><div><span>Products / offers</span><b id="businessProductCount">0 configured</b></div></div>
+            <div id="businessProductList" class="product-chip-list"></div>
+          </article>
+
+          <article class="panel lead-sources-panel">
+            <div class="panel-head"><div><p class="eyebrow">LEAD INTAKE</p><h2>Bring leads in automatically</h2></div><button class="primary-btn small" id="addLeadBtnMore">+ Add lead</button></div>
+            <p class="panel-copy">Website, email, bookings, referrals, imports and webhooks become relationship records instead of loose contacts.</p>
+            <div class="lead-source-grid" id="leadSourceGrid"></div>
+            <div class="lead-api-box"><div><b>Website/API endpoint</b><span>POST /api/leads</span></div><div class="button-row"><button class="soft-btn small" id="testLeadFormBtn">Test website form</button><button class="soft-btn small" id="copyLeadEndpointBtn">Copy endpoint</button></div></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">EMAIL AUTOMATION</p><h2>Sequences</h2></div><button class="primary-btn small" id="newSequenceBtn">+ New sequence</button></div>
+            <div id="sequenceList" class="sequence-list"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">CONTROL</p><h2>Autopilot</h2></div><span class="status-pill live" id="autopilotStatus">Active</span></div>
+            <div class="control-list" id="automationRules"></div>
+          </article>
+
+          <article class="panel integrations-panel">
+            <div class="panel-head"><div><p class="eyebrow">CONNECTED WORK</p><h2>Integrations</h2></div></div>
+            <div class="integration-grid" id="integrationGrid"></div>
+          </article>
+
+          <article class="panel wide-panel trust-center-panel">
+            <div class="panel-head"><div><p class="eyebrow">TRUST, TEAM & OPERATIONS</p><h2>Make intelligence explainable and manageable.</h2></div><span class="status-pill live">2.2</span></div>
+            <p class="panel-copy">Recallya shows where memory came from, why an action is recommended, who owns the relationship and what the system is allowed to do.</p>
+            <div id="trustCenter"></div>
+          </article>
+
+          <article class="panel rogue-card" id="rogueCard">
+            <div class="rogue-badge">ADD-ON</div><div class="rogue-mark">R</div><div><p class="eyebrow">RECALLYA ROGUE</p><h2>Conversations that convert.</h2><p>Optional 18+ relationship layer with its own voice, provider, boundaries and approval rules. Same relationship memory. Separate conversation engine.</p></div><button class="rogue-button" id="configureRogueBtn">Configure Rogue</button>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <button class="mobile-nav-item active" data-view="today"><span>⌂</span><small>Today</small></button>
+      <button class="mobile-nav-item" data-view="inbox"><span>✉</span><small>Inbox</small><i>3</i></button>
+      <button class="mobile-nav-item" data-view="people"><span>◎</span><small>People</small></button>
+      <button class="mobile-nav-item" data-view="ask"><span>✦</span><small>Ask</small></button>
+      <button class="mobile-nav-item" data-view="more"><span>•••</span><small>More</small></button>
+    </nav>
+  </div>
+
+  <dialog id="personDialog" class="sheet-dialog"><div id="personDetail"></div></dialog>
+
+  <dialog id="actionDialog" class="modal-dialog"><form method="dialog" class="modal-shell"><div class="modal-head"><div><p class="eyebrow">RECALLYA ACTION</p><h2 id="actionDialogTitle">Ready to act</h2></div><button class="icon-btn" value="cancel">×</button></div><div id="actionDialogBody"></div></form></dialog>
+
+  <dialog id="leadDialog" class="modal-dialog"><form id="leadForm" class="modal-shell"><div class="modal-head"><div><p class="eyebrow">NEW RELATIONSHIP</p><h2>Add a lead</h2></div><button class="icon-btn" type="button" data-close="leadDialog">×</button></div><div class="form-stack lead-form-grid"><label>Full name<input id="leadName" required placeholder="Dana Mitchell" /></label><label>Company<input id="leadCompany" placeholder="ABC Motors" /></label><label>Email<input id="leadEmail" type="email" placeholder="dana@example.com" /></label><label>Role<input id="leadRole" placeholder="Service Director" /></label><label>Lead source<select id="leadSource"><option>Website form</option><option>Email</option><option>Calendar / booking</option><option>Referral</option><option>Social / DM</option><option>API / webhook</option><option>Manual</option></select></label><label>Estimated value<input id="leadValue" type="number" min="0" step="100" placeholder="5000" /></label><label class="span-two">What do we already know?<textarea id="leadContext" placeholder="Interested in Agent First for a two-location pilot. Asked about training time."></textarea></label><label class="span-two">First action<select id="leadAction"><option>Send personalized introduction</option><option>Book discovery call</option><option>Send information requested</option><option>Review before outreach</option></select></label><button class="primary-btn span-two" type="submit">Create relationship</button></div></form></dialog>
+  <input id="leadCsvInput" type="file" accept=".csv,text/csv" hidden />
+
+  <dialog id="sequenceDialog" class="modal-dialog"><form id="sequenceForm" class="modal-shell"><div class="modal-head"><div><p class="eyebrow">SEQUENCE BUILDER</p><h2>New email sequence</h2></div><button class="icon-btn" type="button" data-close="sequenceDialog">×</button></div><div class="form-stack"><label>Name<input id="seqName" required placeholder="Dealership pilot follow-up" /></label><label>Goal<select id="seqGoal"><option>Book a meeting</option><option>Move proposal forward</option><option>Re-engage a lead</option><option>Onboard a client</option><option>Expand an account</option></select></label><label>Voice<select id="seqVoice"></select></label><label>Sending mode<select id="seqMode"><option>Approval</option><option>Autopilot</option><option>Manual</option></select></label><label>Stop conditions<textarea id="seqStops">Stop if they reply, book a meeting or become a customer.</textarea></label><button class="primary-btn" type="submit">Create sequence</button></div></form></dialog>
+
+  <dialog id="campaignDialog" class="modal-dialog wide-dialog"><form id="campaignForm" class="modal-shell"><div class="modal-head"><div><p class="eyebrow">RECALLYA PUBLISHER</p><h2>New campaign</h2></div><button class="icon-btn" type="button" data-close="campaignDialog">×</button></div><div class="form-stack campaign-form-grid"><label>Campaign name<input id="campaignName" required placeholder="Agent First demo push" /></label><label>Goal<select id="campaignGoal"><option>Book consultations</option><option>Generate leads</option><option>Drive website traffic</option><option>Promote an offer</option><option>Re-engage audience</option></select></label><label>Voice<select id="campaignVoice"></select></label><label>Destination URL<input id="campaignUrl" placeholder="https://example.com/demo" /></label><label class="span-two">Core message<textarea id="campaignMessage" required placeholder="Tell Recallya the idea once. It will adapt the message for each channel."></textarea></label><fieldset class="span-two channel-fieldset"><legend>Channels</legend><div id="campaignChannelChecks" class="channel-checks"></div></fieldset><label>When<select id="campaignWhen"><option>Now</option><option>Tomorrow morning</option><option>Tomorrow afternoon</option><option>Custom schedule</option></select></label><label>Posting mode<select id="campaignMode"><option>Approval</option><option>Autopilot where allowed</option><option>Draft only</option></select></label><div class="span-two policy-note">Recallya checks each channel’s configured policy before scheduling. Approval-only channels never auto-publish.</div><button class="primary-btn span-two" type="submit">Build campaign</button></div></form></dialog>
+
+  <dialog id="voiceDialog" class="modal-dialog wide-dialog"><form id="voiceForm" class="modal-shell"><div class="modal-head"><div><p class="eyebrow">VOICE STUDIO</p><h2 id="voiceDialogTitle">Create a voice</h2></div><button class="icon-btn" type="button" data-close="voiceDialog">×</button></div><input id="voiceId" type="hidden" /><div class="form-stack voice-form-grid"><label>Name<input id="voiceName" required placeholder="Erica / Founder" /></label><label>Use for<select id="voiceUse"><option>Founder / direct messages</option><option>Sales</option><option>Support</option><option>Social / public posts</option><option>Rogue provider</option></select></label><label>Directness <output id="directnessOut">80</output><input id="voiceDirectness" type="range" min="0" max="100" value="80" /></label><label>Warmth <output id="warmthOut">70</output><input id="voiceWarmth" type="range" min="0" max="100" value="70" /></label><label>Formality <output id="formalityOut">45</output><input id="voiceFormality" type="range" min="0" max="100" value="45" /></label><label>Sales energy <output id="salesOut">75</output><input id="voiceSales" type="range" min="0" max="100" value="75" /></label><label class="span-two">How this voice sounds<textarea id="voiceDescription" placeholder="Direct, conversational, confident, never corporate. Explains value clearly and keeps moving toward a next step."></textarea></label><label class="span-two">Examples that sound right<textarea id="voiceSamples" placeholder="Paste a few messages, emails or captions that sound exactly right. One example per line."></textarea></label><label>Never say<input id="voiceAvoid" placeholder="circle back, just checking in" /></label><label>Default CTA style<input id="voiceCTA" placeholder="Direct next step, low friction" /></label><button class="primary-btn span-two" type="submit">Save voice</button></div></form></dialog>
+
+  <dialog id="automationDialog" class="modal-dialog wide-dialog"><div class="modal-shell"><div class="modal-head"><div><p class="eyebrow">AUTOMATION CENTER</p><h2>What Recallya may do for you</h2></div><button class="icon-btn" type="button" data-close="automationDialog">×</button></div><p class="panel-copy">Memory always runs. Actions follow your approval rules.</p><div id="automationCenterRules" class="automation-center"></div></div></dialog>
+
+  <dialog id="rogueDialog" class="modal-dialog wide-dialog"><form id="rogueForm" class="modal-shell rogue-modal"><div class="modal-head"><div><p class="eyebrow">RECALLYA ROGUE</p><h2>Conversations that convert.</h2></div><button class="icon-btn" type="button" data-close="rogueDialog">×</button></div><div class="rogue-hero-mini"><div class="rogue-mark">R</div><div><b>Separate adult conversation layer</b><span>Same authorized relationship memory. Separate provider and voice.</span></div></div><div class="form-stack rogue-form-grid"><label><span class="label-title">Enable Rogue configuration</span><select id="rogueEnabled"><option value="false">Off</option><option value="true">Configured</option></select></label><label>Rogue voice<select id="rogueVoice"></select></label><label>External provider name<input id="rogueProvider" placeholder="Adult-capable provider" /></label><label>Provider endpoint<input id="rogueEndpoint" placeholder="https://provider.example/api" /></label><label class="span-two">Boundaries / never do<textarea id="rogueBoundaries" placeholder="18+ only. Respect opt-outs. Never infer age. Escalate custom requests outside approved catalog. Never send mature content unsolicited."></textarea></label><label>Default conversation mode<select id="rogueMode"><option>Approval</option><option>Autopilot for verified 18+ customers</option><option>Human only</option></select></label><label>Custom requests<select id="rogueCustom"><option>Always require human approval</option><option>Allow within approved catalog</option></select></label><div class="span-two policy-note rogue-policy">Recallya Core does not generate explicit content itself. Rogue is a routing, memory and control layer for an external provider configured by the business.</div><button class="primary-btn span-two" type="submit">Save Rogue settings</button></div></form></dialog>
+
+
+  <dialog id="workspaceDialog" class="modal-dialog wide-dialog"><div class="modal-shell"><div class="modal-head"><div><p class="eyebrow">WORKSPACE SWITCHER</p><h2>Your businesses</h2></div><button class="icon-btn" type="button" data-close="workspaceDialog">×</button></div><p class="panel-copy">Switching workspaces changes the entire Recallya context: customers, voices, products, channels, automations and analytics.</p><div id="workspaceDialogList" class="workspace-dialog-list"></div><button class="primary-btn" id="workspaceDialogAddBtn" type="button">+ Add another business</button></div></dialog>
+
+  <dialog id="workspaceSettingsDialog" class="modal-dialog wide-dialog"><form id="workspaceSettingsForm" class="modal-shell"><div class="modal-head"><div><p class="eyebrow">BUSINESS SETTINGS</p><h2 id="workspaceSettingsTitle">Business workspace</h2></div><button class="icon-btn" type="button" data-close="workspaceSettingsDialog">×</button></div><input type="hidden" id="workspaceSettingsId" /><div class="form-stack workspace-form-grid"><label>Business name<input id="workspaceBusinessName" required /></label><label>Category<input id="workspaceCategory" placeholder="Consulting / SaaS" /></label><label>Website<input id="workspaceWebsite" placeholder="https://example.com" /></label><label>Primary goal<input id="workspaceGoal" placeholder="Book consultations and close pilots" /></label><label class="span-two">Products / offers<textarea id="workspaceProducts" placeholder="Agent First workflow audit | $3,500
+Two-location pilot | $18,000"></textarea><small>One per line. Use “Name | Price” when you want Recallya to remember pricing.</small></label><label>Workspace type<select id="workspaceType"><option value="business">Business</option><option value="creator">Creator / Rogue eligible</option><option value="agency">Agency / client workspace</option></select></label><label>Default context<select id="workspaceTemplate"><option value="keep">Keep current data</option><option value="blank">Start blank</option><option value="sales">Sales CRM starter</option></select></label><button class="primary-btn span-two" type="submit">Save workspace</button></div></form></dialog>
+
+  <dialog id="newWorkspaceDialog" class="modal-dialog wide-dialog"><form id="newWorkspaceForm" class="modal-shell"><div class="modal-head"><div><p class="eyebrow">NEW BUSINESS</p><h2>Add a Recallya workspace</h2></div><button class="icon-btn" type="button" data-close="newWorkspaceDialog">×</button></div><div class="form-stack workspace-form-grid"><label>Business name<input id="newWorkspaceName" required placeholder="My next business" /></label><label>Type<select id="newWorkspaceType"><option value="business">Business</option><option value="creator">Creator / Rogue eligible</option><option value="agency">Agency / client workspace</option></select></label><label>Category<input id="newWorkspaceCategory" placeholder="Consulting, ecommerce, creator..." /></label><label>Website<input id="newWorkspaceWebsite" placeholder="https://example.com" /></label><label class="span-two">Primary goal<input id="newWorkspaceGoal" placeholder="Generate leads and convert conversations" /></label><label class="span-two">Start with<select id="newWorkspaceTemplate"><option value="blank">Blank workspace</option><option value="sales">Sales CRM starter</option></select></label><button class="primary-btn span-two" type="submit">Create business</button></div></form></dialog>
+
+  <dialog id="whyDialog" class="modal-dialog"><div class="modal-shell"><div class="modal-head"><div><p class="eyebrow">WHY THIS?</p><h2>Explain the recommendation</h2></div><button class="icon-btn" type="button" data-close="whyDialog">×</button></div><div id="whyContent"></div></div></dialog>
+  <dialog id="teamDialog" class="modal-dialog wide-dialog"><div class="modal-shell"><div class="modal-head"><div><p class="eyebrow">TEAM & HANDOFFS</p><h2>People who can own relationships</h2></div><button class="icon-btn" type="button" data-close="teamDialog">×</button></div><div id="teamMemberList" class="team-member-list"></div><form id="teamForm" class="form-stack team-form"><label>Name<input id="teamName" required placeholder="Team member name" /></label><label>Role<input id="teamRole" placeholder="Sales, Support, Manager..." /></label><label>Access<select id="teamAccess"><option>Active workspace</option><option>Assigned records</option><option>Portfolio owner</option></select></label><button class="primary-btn" type="submit">Add team member</button></form></div></dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

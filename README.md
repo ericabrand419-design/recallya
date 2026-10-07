@@ -4,7 +4,7 @@
 
 Recallya is an agent-first relationship intelligence CRM built around a simple idea: the person doing the work should not have to remember, reconstruct and manually maintain every customer relationship.
 
-This build combines the full product concept into one mobile-first prototype: relationship memory, Ask Recallya, next-best-action, lead intake, contextual selling, Voice Studio, Publisher, sequences, tasks/calendar capture, Autopilot controls and the separate Recallya Rouge add-on architecture.
+This build combines the full product concept into one mobile-first prototype: relationship memory, Ask Recallya, next-best-action, lead intake, contextual selling, Voice Studio, Publisher, sequences, tasks/calendar capture, Autopilot controls and the separate Recallya Rogue add-on architecture.
 
 ## What is working in this prototype
 
@@ -27,13 +27,13 @@ This build combines the full product concept into one mobile-first prototype: re
 
 ## Multi-business / Portfolio
 
-Recallya now treats every business as a separate workspace rather than a filter. Each workspace has its own customers, conversations, voice profiles, products, lead sources, sequences, Publisher campaigns, channel settings, automation rules, analytics and optional Rouge configuration.
+Recallya now treats every business as a separate workspace rather than a filter. Each workspace has its own customers, conversations, voice profiles, products, lead sources, sequences, Publisher campaigns, channel settings, automation rules, analytics and optional Rogue configuration.
 
 The owner-level **Portfolio** view rolls up only high-level signals across authorized workspaces: conversations that need attention, open pipeline, leads, tasks and promises. **Ask Portfolio** is the intentional cross-business assistant. Normal **Ask Recallya** remains scoped to the active business.
 
 Included prototype workspaces demonstrate the architecture with Agent First, Recallya and a creator-business example. Users can add additional businesses, switch context from mobile or desktop, edit business identity/goals/products and start new workspaces blank or from a sales CRM starter.
 
-Production schema support includes `workspaces`, `workspace_members`, `workspace_products` and workspace ownership keys across CRM, automation, Publisher, lead, voice and Rouge tables. Lead intake accepts a `workspace_slug` so inbound forms and webhooks can route a lead to the correct business.
+Production schema support includes `workspaces`, `workspace_members`, `workspace_products` and workspace ownership keys across CRM, automation, Publisher, lead, voice and Rogue tables. Lead intake accepts a `workspace_slug` so inbound forms and webhooks can route a lead to the correct business.
 
 ### Relationship intelligence
 - Mobile-first **Today, Inbox, People, Ask Recallya and More** navigation
@@ -59,7 +59,7 @@ Voice profiles are reusable across conversations, sequences and campaigns. The p
 - Agent First Sales
 - Agent First Support
 - Brand Social
-- Recallya Rouge (separate provider profile)
+- Recallya Rogue (separate provider profile)
 
 Each profile stores directness, warmth, formality, sales energy, a description, approved examples, phrases to avoid and CTA style. Users can create and edit additional voices.
 
@@ -101,17 +101,17 @@ Rules are independently configurable for:
 
 Each can be set to Autopilot, Approval, Recommend or Human as appropriate.
 
-### Recallya Rouge
-Rouge is deliberately separated from Core. It shares authorized relationship memory but uses its own:
+### Recallya Rogue
+Rogue is deliberately separated from Core. It shares authorized relationship memory but uses its own:
 - voice profile
 - external provider
 - boundaries
 - approval/autopilot setting
 - custom-request setting
 
-Core does **not** generate mature dialogue itself. Rouge is the routing, context, memory and control layer for an external adult-capable provider configured by the business. The UI requires a separate configuration and is built around 18+ use, opt-outs and human-control boundaries.
+Core does **not** generate mature dialogue itself. Rogue is the routing, context, memory and control layer for an external adult-capable provider configured by the business. The UI requires a separate configuration and is built around 18+ use, opt-outs and human-control boundaries.
 
-`POST /api/voice-preview` will use the normal external text provider for business voice generation when configured. Requests tagged as the Rouge surface return a provider-required response instead of generating mature dialogue inside Core.
+`POST /api/voice-preview` will use the normal external text provider for business voice generation when configured. Requests tagged as the Rogue surface return a provider-required response instead of generating mature dialogue inside Core.
 
 ## Product principle
 
@@ -161,11 +161,11 @@ No package install is required for this prototype.
 - channel configurations
 - publisher campaigns and scheduled posts
 - automation rules
-- Rouge configuration
+- Rogue configuration
 - campaign attribution events
 - approval queue and audit log
 - workspaces, workspace membership and per-business product catalogs
-- workspace isolation keys across customer, conversation, campaign, sequence, automation and Rouge data
+- workspace isolation keys across customer, conversation, campaign, sequence, automation and Rogue data
 
 ## What still requires real credentials
 

@@ -10,5 +10,5 @@
   "engines": {
     "node": ">=20"
   },
-  "description": "Recallya customer relationship operating system with real accounts, persistent workspaces, relationship reconstruction, voice, lead nurturing, automation and optional Rouge."
+  "description": "Recallya customer relationship operating system with real accounts, persistent workspaces, relationship reconstruction, voice, lead nurturing, automation and optional Rogue."
 }
