@@ -174,7 +174,7 @@ create table if not exists lead_intake_events (
 create index if not exists customers_lead_source_idx on customers(lead_source);
 create index if not exists customers_lead_status_idx on customers(lead_status);
 
--- Recallya v2: Voice Studio, Publisher, channel policy and Rouge configuration
+-- Recallya v2: Voice Studio, Publisher, channel policy and Rogue configuration
 create table if not exists voice_profiles (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid references organizations(id) on delete cascade,
@@ -189,7 +189,7 @@ create table if not exists voice_profiles (
   sample_messages jsonb default '[]'::jsonb,
   avoid_phrases jsonb default '[]'::jsonb,
   cta_style text,
-  is_rouge boolean default false,
+  is_rogue boolean default false,
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
   unique(organization_id, slug)
@@ -232,7 +232,7 @@ create table if not exists automation_rules (
   unique(organization_id, rule_key)
 );
 
-create table if not exists rouge_settings (
+create table if not exists rogue_settings (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid references organizations(id) on delete cascade unique,
   enabled boolean default false,
@@ -310,7 +310,7 @@ alter table lead_intake_events add column if not exists workspace_id uuid refere
 alter table voice_profiles add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
 alter table channel_configs add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
 alter table automation_rules add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
-alter table rouge_settings add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
+alter table rogue_settings add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
 alter table campaign_attribution_events add column if not exists workspace_id uuid references workspaces(id) on delete cascade;
 
 create index if not exists customers_workspace_idx on customers(workspace_id);
