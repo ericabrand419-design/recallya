@@ -553,3 +553,14 @@ alter table workspace_billing enable row level security;
 
 -- Server APIs use the Supabase service role after verifying the signed-in user and
 -- workspace_members authorization. Direct browser access to these tables remains blocked.
+
+
+-- Lock down every public table: the browser never talks to Supabase directly.
+-- Server APIs use the service role (which bypasses RLS) after checking the signed-in user.
+do $$
+declare t record;
+begin
+  for t in select tablename from pg_tables where schemaname = 'public' loop
+    execute format('alter table public.%I enable row level security', t.tablename);
+  end loop;
+end $$;
