@@ -118,6 +118,93 @@
     };
   }
 
+  // ---- Account agent: daily briefing + approval queue on the Today screen ----
+  const KIND={reply:'Reply',keep_promise:'Keep a promise',follow_up:'Follow up',re_engage:'Re-engage'};
+  let agentWs=null, agentRun=null, agentBusy=false;
+  function agentStyles(){
+    if(document.getElementById('agentPanelStyles'))return;
+    const st=document.createElement('style');st.id='agentPanelStyles';
+    st.textContent=`body.production-live #today-view .hero-card{display:none}.agent-panel{margin:0 0 18px}.agent-briefing{font-size:1.02rem;line-height:1.5;margin:6px 0 4px}.agent-meta{display:block;opacity:.65;margin-bottom:12px}.agent-items{display:grid;gap:12px}.agent-item{border:1px solid rgba(120,140,170,.25);border-radius:14px;padding:14px}.agent-item-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}.agent-chip{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:rgba(120,140,170,.18)}.agent-chip.high{background:rgba(229,72,77,.15);color:#c0262d}.agent-chip.medium{background:rgba(245,166,35,.18);color:#9a5b00}.agent-kind{font-size:.85rem;opacity:.7}.agent-reason{margin:0 0 8px;line-height:1.45}.agent-draft{width:100%;box-sizing:border-box;min-height:84px;border-radius:10px;border:1px solid rgba(120,140,170,.35);padding:10px;font:inherit;line-height:1.45;resize:vertical}.agent-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.agent-handled{opacity:.65;font-size:.9rem;margin-top:4px}`;
+    document.head.appendChild(st);
+  }
+  function agentPanel(){
+    let el=document.getElementById('agentPanel');
+    const today=document.getElementById('today-view');
+    if(!today)return null;
+    if(!el){
+      el=document.createElement('article');el.id='agentPanel';el.className='panel agent-panel';
+      el.innerHTML='<div class="panel-head"><div><p class="eyebrow">YOUR RECALLYA AGENT</p><h2>Today\'s briefing</h2></div><button class="soft-btn" id="agentRunBtn" type="button">Run now</button></div><p class="agent-briefing" id="agentBriefing">Loading your agent…</p><small class="agent-meta" id="agentMeta"></small><div class="agent-items" id="agentItems"></div><div class="agent-handled" id="agentHandled"></div>';
+      const hero=today.querySelector('.hero-card');
+      if(hero&&hero.nextSibling)today.insertBefore(el,hero.nextSibling);else today.prepend(el);
+      el.querySelector('#agentRunBtn').onclick=()=>runAgentNow();
+    }
+    return el;
+  }
+  function when(iso){if(!iso)return'';const d=new Date(iso);const mins=Math.round((Date.now()-d.getTime())/60000);if(mins<1)return'just now';if(mins<60)return`${mins} min ago`;const h=Math.round(mins/60);if(h<24)return`${h} hr ago`;return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})}
+  function renderAgent(){
+    const el=agentPanel();if(!el)return;
+    const run=agentRun;
+    el.querySelector('#agentRunBtn').disabled=agentBusy;
+    el.querySelector('#agentRunBtn').textContent=agentBusy?'Reviewing…':'Run now';
+    if(!run){
+      el.querySelector('#agentBriefing').textContent='Your agent has not run yet. It reviews your relationships every morning, or press Run now.';
+      el.querySelector('#agentMeta').textContent='Drafts only. Nothing is sent without your approval.';
+      el.querySelector('#agentItems').innerHTML='';el.querySelector('#agentHandled').textContent='';return;
+    }
+    el.querySelector('#agentBriefing').textContent=run.briefing||'';
+    el.querySelector('#agentMeta').textContent=`Last review ${when(run.runAt)}${run.model?'':' (built-in rules, AI was unavailable)'}. Drafts only. Nothing is sent without your approval.`;
+    const open=(run.items||[]).filter(i=>i.status==='pending');
+    const handled=(run.items||[]).length-open.length;
+    el.querySelector('#agentItems').innerHTML=open.map(i=>`<div class="agent-item" data-agent-item="${esc(i.id)}"><div class="agent-item-head"><strong>${esc(i.personName)}</strong><span class="agent-chip ${esc(i.priority)}">${esc(i.priority)}</span><span class="agent-kind">${esc(KIND[i.kind]||'Follow up')}</span></div><p class="agent-reason">${esc(i.reason)}</p>${i.draft?`<textarea class="agent-draft" aria-label="Draft for ${esc(i.personName)}">${esc(i.draft)}</textarea>`:''}<div class="agent-actions">${i.draft?'<button class="primary-btn" type="button" data-agent-use>Use draft</button>':''}<button class="soft-btn" type="button" data-agent-done>Done</button><button class="soft-btn" type="button" data-agent-dismiss>Dismiss</button></div></div>`).join('')||'<p class="agent-reason">Nothing waiting on you from this review.</p>';
+    el.querySelector('#agentHandled').textContent=handled?`${handled} handled from this review.`:'';
+    el.querySelectorAll('[data-agent-item]').forEach(card=>{
+      const item=open.find(x=>x.id===card.dataset.agentItem);
+      card.querySelector('[data-agent-done]').onclick=()=>setAgentItem(item,'done');
+      card.querySelector('[data-agent-dismiss]').onclick=()=>setAgentItem(item,'dismissed');
+      const use=card.querySelector('[data-agent-use]');
+      if(use)use.onclick=()=>useDraft(item,card.querySelector('.agent-draft').value);
+    });
+  }
+  async function loadAgent(){
+    const ws=window.RecallyaApp?.getActiveWorkspaceId?.();if(!ws||!currentUser)return;
+    agentWs=ws;
+    const {r,data}=await jsonFetch(`/api/agent?workspaceId=${encodeURIComponent(ws)}`);
+    if(ws!==agentWs)return;
+    agentRun=r.ok?data.run:null;renderAgent();
+  }
+  async function runAgentNow(){
+    if(agentBusy||!agentWs)return;agentBusy=true;renderAgent();
+    const {r,data}=await jsonFetch('/api/agent',{method:'POST',body:JSON.stringify({action:'run',workspaceId:agentWs})});
+    agentBusy=false;
+    if(r.ok){agentRun=data.run;window.RecallyaApp?.toast?.('Your agent finished its review')}
+    else if(data.error==='ran_recently'){agentRun=data.run;window.RecallyaApp?.toast?.(`Your agent just ran. Try again in ${data.retryInMinutes} min.`)}
+    else window.RecallyaApp?.toast?.('Your agent could not finish. Try again shortly.');
+    renderAgent();
+  }
+  async function setAgentItem(item,status){
+    if(!item)return;item.status=status;renderAgent();
+    const {r}=await jsonFetch('/api/agent',{method:'POST',body:JSON.stringify({action:'item',workspaceId:agentWs,itemId:item.id,status})});
+    if(!r.ok){item.status='pending';renderAgent();window.RecallyaApp?.toast?.('Could not update that item.')}
+  }
+  function useDraft(item,text){
+    const app=window.RecallyaApp;
+    if(app&&item.conversationId){
+      app.navigate('inbox');
+      setTimeout(()=>{const t=document.querySelector(`[data-conversation="${CSS.escape(item.conversationId)}"]`);if(t)t.click();const box=document.getElementById('replyText');if(box){box.value=text;box.focus()}app.toast?.('Draft placed in the reply box. Review it, then send.')},60);
+      return;
+    }
+    navigator.clipboard?.writeText(text).then(()=>app?.toast?.('Draft copied. This person has no conversation yet.'),()=>{});
+  }
+  function installAgent(){
+    agentStyles();agentPanel();loadAgent();
+    setInterval(()=>{
+      if(!currentUser)return;
+      if(!document.getElementById('agentPanel')){agentPanel();renderAgent()}
+      const ws=window.RecallyaApp?.getActiveWorkspaceId?.();
+      if(ws&&ws!==agentWs){agentRun=null;renderAgent();loadAgent()}
+    },2000);
+  }
+
   async function boot(){
     if(demoMode){
       showGate('<main class="prod-gate-card loading-card"><div class="prod-brand"><div class="brand-mark"><span>R</span></div><div><strong>Recallya</strong><small>Loading sample workspace…</small></div></div><div class="prod-loader"></div></main>');
@@ -136,7 +223,7 @@
     currentUser=data.user;
     const app=await loadApp();
     app.setProductionPortfolio(data.workspaces,data.activeWorkspaceId);
-    installSignOut(app);installWorkspaceCreate(app);
+    installSignOut(app);installWorkspaceCreate(app);installAgent();
     document.querySelector('.avatar-btn')?.setAttribute('title',data.user?.email||'Signed in');
     document.body.classList.add('production-live');
     hideGate();

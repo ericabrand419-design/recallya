@@ -85,5 +85,11 @@
       "destination": "/rogue",
       "permanent": true
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 11 * * *"
+    }
   ]
 }
